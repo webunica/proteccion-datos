@@ -1,0 +1,13 @@
+{
+  "name": "@sist-protec-datos/widget",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "esbuild src/index.ts --bundle --outfile=dist/widget.js --watch --format=iife --global-name=LEY21719 --loader:.ts=ts",
+    "build": "esbuild src/index.ts --bundle --outfile=dist/widget.js --minify --format=iife --global-name=LEY21719 --loader:.ts=ts"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "typescript": "^5.4.0"
+  }
+}

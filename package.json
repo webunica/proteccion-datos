@@ -1,0 +1,17 @@
+{
+  "name": "sist-protec-datos",
+  "private": true,
+  "workspaces": ["apps/*", "packages/*", "integrations/*"],
+  "scripts": {
+    "dev": "pnpm --filter admin dev",
+    "build": "pnpm --filter admin build && pnpm --filter widget build",
+    "widget:dev": "pnpm --filter widget dev",
+    "widget:build": "pnpm --filter widget build"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "prettier": "^3.2.0",
+    "eslint": "^8.57.0"
+  },
+  "engines": { "node": ">=20", "pnpm": ">=9" }
+}
