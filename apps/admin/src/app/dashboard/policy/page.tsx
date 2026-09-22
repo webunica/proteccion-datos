@@ -8,7 +8,7 @@ import {
   Calendar,
   Layers,
 } from 'lucide-react';
-import type { PrivacyPolicy } from '@sist-protec-datos/shared';
+import type { PrivacyPolicy } from '@/types/shared';
 
 export const revalidate = 0;
 

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import type { ConsentPostBody } from '@sist-protec-datos/shared';
+import type { ConsentPostBody } from '@/types/shared';
 
 // Usa la service role key para bypass de RLS en inserción anónima desde el widget
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || '';

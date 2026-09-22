@@ -9,8 +9,8 @@ import {
   Shield,
   Search,
 } from 'lucide-react';
-import type { RightsRequest, RightsType, RightsStatus } from '@sist-protec-datos/shared';
-import { RIGHTS_TYPE_LABELS, RIGHTS_STATUS_LABELS } from '@sist-protec-datos/shared';
+import type { RightsRequest, RightsType, RightsStatus } from '@/types/shared';
+import { RIGHTS_TYPE_LABELS, RIGHTS_STATUS_LABELS } from '@/types/shared';
 
 export const revalidate = 0;
 

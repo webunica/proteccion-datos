@@ -8,8 +8,8 @@ import {
   AlertOctagon,
   BellRing,
 } from 'lucide-react';
-import type { BreachIncident, BreachRisk, BreachStatus } from '@sist-protec-datos/shared';
-import { BREACH_RISK_LABELS, BREACH_STATUS_LABELS } from '@sist-protec-datos/shared';
+import type { BreachIncident, BreachRisk, BreachStatus } from '@/types/shared';
+import { BREACH_RISK_LABELS, BREACH_STATUS_LABELS } from '@/types/shared';
 
 export const revalidate = 0;
 

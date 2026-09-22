@@ -16,8 +16,7 @@
     "@supabase/ssr": "^0.6.0",
     "lucide-react": "^0.475.0",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^2.6.0",
-    "@sist-protec-datos/shared": "workspace:*"
+    "tailwind-merge": "^2.6.0"
   },
   "devDependencies": {
     "typescript": "^5.4.0",

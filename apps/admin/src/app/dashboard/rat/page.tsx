@@ -9,8 +9,8 @@ import {
   Clock,
   ExternalLink,
 } from 'lucide-react';
-import type { RatTreatment, LegalBasis, RiskLevel } from '@sist-protec-datos/shared';
-import { LEGAL_BASIS_LABELS, RISK_LEVEL_LABELS } from '@sist-protec-datos/shared';
+import type { RatTreatment, LegalBasis, RiskLevel } from '@/types/shared';
+import { LEGAL_BASIS_LABELS, RISK_LEVEL_LABELS } from '@/types/shared';
 
 export const revalidate = 0;
 
