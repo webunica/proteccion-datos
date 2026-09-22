@@ -104,7 +104,7 @@ export default async function ClientsPage() {
         </div>
         <Link
           href="/dashboard/clients/new"
-          className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-blue-500/25"
         >
           <Plus className="w-4 h-4" />
           Nuevo cliente
@@ -112,7 +112,7 @@ export default async function ClientsPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] overflow-hidden">
         {list.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="bg-gray-100 rounded-full p-4 mb-4">

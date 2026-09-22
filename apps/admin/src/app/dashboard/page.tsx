@@ -62,19 +62,21 @@ function StatCardComponent({
   trend,
 }: StatCard) {
   return (
-    <div className="bg-white rounded-xl border border-gray-100 p-5 shadow-sm hover:shadow-md transition-shadow">
+    <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] hover:shadow-md transition-all">
       <div className="flex items-start justify-between">
-        <div className={`${bg} rounded-lg p-2.5`}>
+        <div className={`${bg} rounded-xl p-2.5`}>
           <Icon className={`w-5 h-5 ${color}`} />
         </div>
         {trend && (
-          <span className="text-xs font-medium text-gray-400">{trend}</span>
+          <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200/60">
+            {trend}
+          </span>
         )}
       </div>
-      <div className="mt-3">
-        <p className="text-2xl font-bold text-gray-900">{value}</p>
-        <p className="text-sm font-medium text-gray-700 mt-0.5">{title}</p>
-        <p className="text-xs text-gray-400 mt-1">{description}</p>
+      <div className="mt-4">
+        <p className="text-3xl font-extrabold text-slate-900 tracking-tight">{value}</p>
+        <p className="text-sm font-semibold text-slate-700 mt-1">{title}</p>
+        <p className="text-xs text-slate-400 mt-0.5">{description}</p>
       </div>
     </div>
   );
@@ -218,17 +220,17 @@ export default async function DashboardPage() {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard/arsop/new"
-            className="flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors"
+            href="/dashboard/rights"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-blue-500/25"
           >
             <Plus className="w-4 h-4" />
             Nueva solicitud ARSOP+
           </Link>
           <Link
             href="/dashboard/rat"
-            className="flex items-center gap-2 bg-white border border-gray-200 hover:border-gray-300 text-gray-700 text-sm font-semibold px-4 py-2.5 rounded-lg transition-colors"
+            className="flex items-center gap-2 bg-white border border-slate-200/80 hover:border-slate-300 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm"
           >
-            <ClipboardList className="w-4 h-4" />
+            <ClipboardList className="w-4 h-4 text-slate-500" />
             Actualizar RAT
           </Link>
         </div>

@@ -28,7 +28,7 @@ export default async function DashboardLayout({
   const role = profile?.role ?? 'client';
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-[#F8FAFC] text-slate-800 overflow-hidden font-sans antialiased">
       {/* Sidebar */}
       <SidebarNav
         userEmail={user.email ?? ''}
@@ -38,7 +38,7 @@ export default async function DashboardLayout({
 
       {/* Main content */}
       <main className="flex-1 overflow-y-auto">
-        <div className="max-w-7xl mx-auto px-6 py-8">{children}</div>
+        <div className="max-w-7xl mx-auto px-8 py-10">{children}</div>
       </main>
     </div>
   );
