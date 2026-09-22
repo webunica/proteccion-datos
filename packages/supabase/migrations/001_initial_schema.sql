@@ -93,8 +93,8 @@ CREATE TABLE rights_requests (
   assigned_to      UUID REFERENCES auth.users(id),
   resolution_note  TEXT,
   evidence_url     TEXT,
-  -- SLA tracking
-  ack_deadline     TIMESTAMPTZ GENERATED ALWAYS AS (received_at + INTERVAL '5 business days') STORED,
+  -- SLA tracking (7 días corridos para cubrir los 5 días hábiles de acuse)
+  ack_deadline     TIMESTAMPTZ GENERATED ALWAYS AS (received_at + INTERVAL '7 days') STORED,
   resolution_deadline TIMESTAMPTZ GENERATED ALWAYS AS (received_at + INTERVAL '30 days') STORED,
   created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
