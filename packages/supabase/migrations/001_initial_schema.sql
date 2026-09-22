@@ -93,11 +93,11 @@ CREATE TABLE rights_requests (
   assigned_to      UUID REFERENCES auth.users(id),
   resolution_note  TEXT,
   evidence_url     TEXT,
-  -- SLA tracking (7 días corridos para cubrir los 5 días hábiles de acuse)
-  ack_deadline     TIMESTAMPTZ GENERATED ALWAYS AS (received_at + INTERVAL '7 days') STORED,
-  resolution_deadline TIMESTAMPTZ GENERATED ALWAYS AS (received_at + INTERVAL '30 days') STORED,
-  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at       TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  -- SLA tracking (calculado en trigger para compatibilidad PostgreSQL)
+  ack_deadline        TIMESTAMPTZ,
+  resolution_deadline TIMESTAMPTZ,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_rights_requests_tenant_id ON rights_requests(tenant_id);
@@ -219,6 +219,27 @@ CREATE TRIGGER update_rat_treatments_updated_at BEFORE UPDATE ON rat_treatments
 
 CREATE TRIGGER update_breach_incidents_updated_at BEFORE UPDATE ON breach_incidents
   FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- SLA deadlines trigger for rights_requests
+CREATE OR REPLACE FUNCTION set_rights_request_deadlines()
+RETURNS TRIGGER AS $$
+BEGIN
+  IF NEW.received_at IS NULL THEN
+    NEW.received_at = NOW();
+  END IF;
+  IF NEW.ack_deadline IS NULL THEN
+    NEW.ack_deadline = NEW.received_at + INTERVAL '7 days';
+  END IF;
+  IF NEW.resolution_deadline IS NULL THEN
+    NEW.resolution_deadline = NEW.received_at + INTERVAL '30 days';
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER set_deadlines_on_rights_requests
+  BEFORE INSERT ON rights_requests
+  FOR EACH ROW EXECUTE FUNCTION set_rights_request_deadlines();
 
 -- ============================================
 -- ROW LEVEL SECURITY (RLS)
