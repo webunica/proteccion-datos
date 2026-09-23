@@ -39,6 +39,7 @@ export default async function ClientWidgetPage({ params }: ClientWidgetPageProps
     notFound();
   }
 
+  const tenant = tenantData as Tenant;
   const widgetUrl = process.env.NEXT_PUBLIC_WIDGET_URL || 'https://proteccion-datos-admin.vercel.app';
   const primaryColor = tenant.config?.banner?.primaryColor || '#2563eb';
 
