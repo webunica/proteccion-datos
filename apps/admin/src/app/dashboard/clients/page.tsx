@@ -6,6 +6,7 @@ import {
   ExternalLink,
   Settings,
   TrendingUp,
+  Pencil,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
@@ -205,6 +206,13 @@ export default async function ClientsPage() {
                           >
                             <ExternalLink className="w-3.5 h-3.5" />
                             Ver detalle
+                          </Link>
+                          <Link
+                            href={`/dashboard/clients/${tenant.id}/edit`}
+                            className="flex items-center gap-1 text-xs font-medium text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-2.5 py-1.5 rounded-lg transition-colors"
+                          >
+                            <Pencil className="w-3.5 h-3.5" />
+                            Editar
                           </Link>
                           <Link
                             href={`/dashboard/clients/${tenant.id}/widget`}

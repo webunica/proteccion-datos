@@ -15,6 +15,7 @@ import {
   Code2,
   CheckCircle2,
   Clock,
+  Pencil,
 } from 'lucide-react';
 import type { Tenant } from '@/types/shared';
 
@@ -107,6 +108,13 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
         </div>
 
         <div className="flex items-center gap-3">
+          <Link
+            href={`/dashboard/clients/${tenant.id}/edit`}
+            className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl border border-slate-200/80 transition-all shadow-sm"
+          >
+            <Pencil className="w-4 h-4 text-slate-500" />
+            Editar datos
+          </Link>
           <Link
             href={`/dashboard/clients/${tenant.id}/widget`}
             className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition-all shadow-sm shadow-blue-500/25"
