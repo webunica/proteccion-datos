@@ -9,7 +9,7 @@
   var winConfig = window.LEY21719_CONFIG || {};
   var scriptEl = document.currentScript;
   if (!scriptEl || !scriptEl.getAttribute('data-tenant')) {
-    var all = document.querySelectorAll('script[data-tenant]');
+    var all = document.querySelectorAll('script[data-tenant], script[src*="widget.js"]');
     scriptEl = all.length ? all[all.length - 1] : null;
   }
 
@@ -22,7 +22,18 @@
   }
 
   var tenantSlug = attr('data-tenant');
-  var apiBaseUrl = (attr('data-api') || window.location.origin).replace(/\/$/, '');
+
+  // Detectar automáticamente el servidor API desde la URL del script widget.js
+  var scriptSrcOrigin = '';
+  if (scriptEl && scriptEl.src) {
+    try {
+      var parsedUrl = new URL(scriptEl.src);
+      scriptSrcOrigin = parsedUrl.origin;
+    } catch (e) {}
+  }
+
+  var fallbackOrigin = 'https://proteccion-datos-admin.vercel.app';
+  var apiBaseUrl = (attr('data-api') || scriptSrcOrigin || fallbackOrigin).replace(/\/$/, '');
   var primaryColor = attr('data-color') || '#2563eb';
   var privacyUrl = attr('data-privacy-url') || '#politica-privacidad';
   var tenantName = attr('data-name') || 'esta tienda';

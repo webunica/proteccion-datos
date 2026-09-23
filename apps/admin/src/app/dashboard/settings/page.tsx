@@ -39,7 +39,8 @@ export default async function SettingsPage() {
     currentTenant = data;
   }
 
-  const snippetCode = `<script\n  src="${process.env.NEXT_PUBLIC_WIDGET_URL || 'https://privacy.tudominio.com'}/widget.js"\n  data-tenant="${currentTenant?.slug || 'SLUG-DE-TU-TIENDA'}"\n  data-color="#2563eb"\n  defer\n></script>`;
+  const widgetUrl = process.env.NEXT_PUBLIC_WIDGET_URL || 'https://proteccion-datos-admin.vercel.app';
+  const snippetCode = `<script\n  src="${widgetUrl}/widget.js"\n  data-tenant="${currentTenant?.slug || 'SLUG-DE-TU-TIENDA'}"\n  data-api="${widgetUrl}"\n  data-color="#2563eb"\n  defer\n></script>`;
 
   return (
     <div className="space-y-8 max-w-4xl">

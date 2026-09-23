@@ -39,11 +39,10 @@ export default async function ClientWidgetPage({ params }: ClientWidgetPageProps
     notFound();
   }
 
-  const tenant = tenantData as Tenant;
-  const widgetUrl = process.env.NEXT_PUBLIC_WIDGET_URL || 'https://privacy.tudominio.com';
+  const widgetUrl = process.env.NEXT_PUBLIC_WIDGET_URL || 'https://proteccion-datos-admin.vercel.app';
   const primaryColor = tenant.config?.banner?.primaryColor || '#2563eb';
 
-  const shopifySnippet = `<!-- Cumplimiento Ley 21.719 — ${tenant.name} -->\n<script\n  src="${widgetUrl}/widget.js"\n  data-tenant="${tenant.slug}"\n  data-color="${primaryColor}"\n  defer\n></script>`;
+  const shopifySnippet = `<!-- Cumplimiento Ley 21.719 — ${tenant.name} -->\n<script\n  src="${widgetUrl}/widget.js"\n  data-tenant="${tenant.slug}"\n  data-api="${widgetUrl}"\n  data-color="${primaryColor}"\n  defer\n></script>`;
 
   const rightsSnippet = `<div id="ley21719-rights-form"></div>`;
   const policySnippet = `<div id="ley21719-policy"></div>`;

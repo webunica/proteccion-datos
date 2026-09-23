@@ -58,8 +58,20 @@ import { initRightsForm } from './rights-form';
   }
 
   const tenantSlug = attr('data-tenant');
-  const apiBaseUrl =
-    attr('data-api') || 'https://privacy.tudominio.com';
+
+  let scriptSrcOrigin = '';
+  if (scriptEl && scriptEl.src) {
+    try {
+      const u = new URL(scriptEl.src);
+      scriptSrcOrigin = u.origin;
+    } catch {}
+  }
+
+  const apiBaseUrl = (
+    attr('data-api') ||
+    scriptSrcOrigin ||
+    'https://proteccion-datos-admin.vercel.app'
+  ).replace(/\/$/, '');
   const primaryColor = attr('data-color') || '#2563eb';
   const privacyUrl =
     attr('data-privacy-url') || '#politica-privacidad';
