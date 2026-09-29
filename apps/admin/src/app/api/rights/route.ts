@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Envío de email de acuse de recibo si está configurado Resend
+    // Envío de email de acuse de recibo y alerta a DPO si está configurado Resend
     if (process.env.RESEND_API_KEY) {
       try {
         await sendAcknowledgementEmail({
@@ -95,6 +95,30 @@ export async function POST(request: NextRequest) {
           requestId: inserted.id,
           requestType: type,
         });
+
+        // Actualizar automáticamente a acuse confirmado
+        await supabase
+          .from('rights_requests')
+          .update({
+            status: 'acknowledged',
+            acknowledged_at: new Date().toISOString(),
+          })
+          .eq('id', inserted.id);
+
+        // Notificar al DPO o contacto de la tienda
+        const dpoEmail = tenant.email_dpo || tenant.email_contacto;
+        if (dpoEmail) {
+          await sendDpoAlertEmail({
+            to: dpoEmail,
+            storeName: tenant.name,
+            requestId: inserted.id,
+            requestType: type,
+            requesterEmail: requester_email,
+            requesterName: requester_name || 'No especificado',
+            requesterRut: requester_rut || 'No especificado',
+            description: description || 'Sin detalle adicional',
+          });
+        }
       } catch (mailErr) {
         console.warn('Advertencia: No se pudo enviar el email de acuse:', mailErr);
       }
@@ -175,6 +199,73 @@ async function sendAcknowledgementEmail({
             <p style="margin: 0;"><strong>Plazo de resolución:</strong> Máximo 30 días hábiles.</p>
           </div>
           <p style="font-size: 13px; color: #6b7280;">Te notificaremos a esta misma casilla de correo electrónico una vez que tu solicitud haya sido resuelta o si requerimos información adicional para verificar tu identidad.</p>
+        </div>
+      `,
+    }),
+  });
+}
+
+async function sendDpoAlertEmail({
+  to,
+  storeName,
+  requestId,
+  requestType,
+  requesterEmail,
+  requesterName,
+  requesterRut,
+  description,
+}: {
+  to: string;
+  storeName: string;
+  requestId: string;
+  requestType: string;
+  requesterEmail: string;
+  requesterName: string;
+  requesterRut: string;
+  description: string;
+}) {
+  const typeMap: Record<string, string> = {
+    access: 'Acceso a Datos Personales',
+    rectify: 'Rectificación de Datos',
+    suppress: 'Supresión / Eliminación de Datos',
+    oppose: 'Oposición al Tratamiento',
+    portability: 'Portabilidad de Datos',
+    block: 'Bloqueo Temporal de Datos',
+  };
+
+  const portalUrl = process.env.NEXT_PUBLIC_WIDGET_URL || 'https://proteccion-datos-admin.vercel.app';
+
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: process.env.EMAIL_FROM || 'notificaciones@privacy.tudominio.com',
+      to: [to],
+      subject: `🚨 [ALERTA DPO] Nueva solicitud ARSOP+ (${storeName}) — ${typeMap[requestType] || requestType}`,
+      html: `
+        <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; color: #111827;">
+          <div style="background-color: #eff6ff; border-left: 4px solid #2563eb; padding: 12px 16px; margin-bottom: 20px;">
+            <h3 style="margin: 0; color: #1e40af; font-size: 16px;">Nueva Solicitud ARSOP+ Recibida</h3>
+            <p style="margin: 4px 0 0; color: #3b82f6; font-size: 13px;">Tienda: <strong>${storeName}</strong></p>
+          </div>
+          <p>Se ha registrado una nueva solicitud de ejercicio de derechos bajo la <strong>Ley 21.719</strong>:</p>
+          <table style="width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 13px;">
+            <tr><td style="padding: 6px; font-weight: bold; width: 140px;">Tipo de Derecho:</td><td style="padding: 6px; color: #2563eb; font-weight: bold;">${typeMap[requestType] || requestType}</td></tr>
+            <tr><td style="padding: 6px; font-weight: bold;">Titular:</td><td style="padding: 6px;">${requesterName}</td></tr>
+            <tr><td style="padding: 6px; font-weight: bold;">Email:</td><td style="padding: 6px;">${requesterEmail}</td></tr>
+            <tr><td style="padding: 6px; font-weight: bold;">RUT:</td><td style="padding: 6px;">${requesterRut}</td></tr>
+            <tr><td style="padding: 6px; font-weight: bold;">Descripción:</td><td style="padding: 6px;">${description}</td></tr>
+            <tr><td style="padding: 6px; font-weight: bold;">Plazo de Resolución:</td><td style="padding: 6px; color: #dc2626; font-weight: bold;">Máximo 30 días hábiles</td></tr>
+          </table>
+          <div style="margin-top: 24px;">
+            <a href="${portalUrl}/dashboard/rights" style="display: inline-block; background-color: #2563eb; color: #ffffff; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: bold;">
+              Tramitar Solicitud en el Panel →
+            </a>
+          </div>
+          <p style="font-size: 11px; color: #9ca3af; margin-top: 24px;">Notificación automática enviada conforme a la Ley 21.719 de Protección de Datos Personales de Chile.</p>
         </div>
       `,
     }),

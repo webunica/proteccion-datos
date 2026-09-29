@@ -18,6 +18,7 @@ import {
   Pencil,
 } from 'lucide-react';
 import type { Tenant } from '@/types/shared';
+import { ComplianceScanner } from './compliance-scanner';
 
 export const revalidate = 0;
 
@@ -160,6 +161,9 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
           <span className="text-xs text-slate-500">Operaciones documentadas</span>
         </div>
       </div>
+
+      {/* Auditoría en Vivo y Compliance Score */}
+      <ComplianceScanner tenantSlug={tenant.slug} initialWebsite={tenant.website || tenant.shop_domain} />
 
       {/* Client Information */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)]">
