@@ -170,10 +170,10 @@ export async function POST(request: NextRequest) {
       { error: 'Acción no soportada. Use "send" o "verify".' },
       { status: 400, headers: corsHeaders() }
     );
-  } catch (err) {
+  } catch (err: any) {
     console.error('OTP API error:', err);
     return NextResponse.json(
-      { error: 'Error interno en la verificación OTP' },
+      { error: 'Error interno en la verificación OTP', detail: err?.message || String(err) },
       { status: 500, headers: corsHeaders() }
     );
   }
