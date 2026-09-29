@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 import type { RightsRequestPostBody } from '@/types/shared';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +15,7 @@ function getAdminClient() {
   return createClient(supabaseUrl, supabaseServiceKey);
 }
 
-async function verifyOtp(email: string, otpCode?: string, otpToken?: string): Promise<boolean> {
+function verifyOtp(email: string, otpCode?: string, otpToken?: string): boolean {
   if (!otpCode || !otpToken) return false;
   try {
     const parts = String(otpToken).split('.');
@@ -22,22 +23,10 @@ async function verifyOtp(email: string, otpCode?: string, otpToken?: string): Pr
     const [expiryStr, receivedSignature] = parts;
     if (Date.now() > Number(expiryStr)) return false;
     const secret = process.env.IP_HASH_SALT || 'ley21719-otp-secret-key-32chars';
-    const enc = new TextEncoder();
-    const key = await crypto.subtle.importKey(
-      'raw',
-      enc.encode(secret),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['sign']
-    );
-    const signature = await crypto.subtle.sign(
-      'HMAC',
-      key,
-      enc.encode(`${email.toLowerCase().trim()}:${otpCode.trim()}:${expiryStr}`)
-    );
-    const expected = Array.from(new Uint8Array(signature))
-      .map((b) => b.toString(16).padStart(2, '0'))
-      .join('');
+    const expected = crypto
+      .createHmac('sha256', secret)
+      .update(`${email.toLowerCase().trim()}:${otpCode.trim()}:${expiryStr}`)
+      .digest('hex');
     return expected === receivedSignature;
   } catch {
     return false;
@@ -80,7 +69,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const isOtpVerified = await verifyOtp(requester_email, otp_code, otp_token);
+    const isOtpVerified = verifyOtp(requester_email, otp_code, otp_token);
 
     // Insertar solicitud en base de datos
     const { data: inserted, error: insertError } = await supabase

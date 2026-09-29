@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,20 +29,9 @@ export async function OPTIONS() {
   });
 }
 
-async function computeSignature(message: string): Promise<string> {
+function computeSignature(message: string): string {
   const secret = process.env.IP_HASH_SALT || 'ley21719-otp-secret-key-32chars';
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    'raw',
-    enc.encode(secret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
-  );
-  const signature = await crypto.subtle.sign('HMAC', key, enc.encode(message));
-  return Array.from(new Uint8Array(signature))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('');
+  return crypto.createHmac('sha256', secret).update(message).digest('hex');
 }
 
 export async function POST(request: NextRequest) {
@@ -66,23 +56,20 @@ export async function POST(request: NextRequest) {
       }
 
       const supabase = getAdminClient();
-      const { data: tenant, error: tenantError } = await supabase
+      const { data: tenant } = await supabase
         .from('tenants')
         .select('name')
         .eq('slug', tenant_slug)
         .eq('is_active', true)
-        .single();
+        .maybeSingle();
 
-      const storeName = (!tenantError && tenant?.name) ? tenant.name : 'la tienda';
+      const storeName = tenant?.name || 'la tienda';
 
-      // Generar código numérico criptográfico de 6 dígitos
-      const randomValues = new Uint32Array(1);
-      crypto.getRandomValues(randomValues);
-      const code = String(100000 + (randomValues[0] % 900000));
-
+      // Código numérico seguro de 6 dígitos
+      const code = String(crypto.randomInt(100000, 1000000));
       const expiry = Date.now() + 15 * 60 * 1000; // 15 minutos
       const normalizedEmail = email.toLowerCase().trim();
-      const signature = await computeSignature(`${normalizedEmail}:${code}:${expiry}`);
+      const signature = computeSignature(`${normalizedEmail}:${code}:${expiry}`);
       const token = `${expiry}.${signature}`;
 
       // Enviar correo con Resend si está configurado
@@ -164,7 +151,7 @@ export async function POST(request: NextRequest) {
       }
 
       const normalizedEmail = email.toLowerCase().trim();
-      const expectedSignature = await computeSignature(`${normalizedEmail}:${otp_code.trim()}:${expiryStr}`);
+      const expectedSignature = computeSignature(`${normalizedEmail}:${otp_code.trim()}:${expiryStr}`);
 
       if (expectedSignature !== receivedSignature) {
         return NextResponse.json(

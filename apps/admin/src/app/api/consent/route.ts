@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import crypto from 'crypto';
 import type { ConsentPostBody } from '@/types/shared';
 
 export const dynamic = 'force-dynamic';
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
     // Anonimización criptográfica de la dirección IP
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
-    const ipHash = await hashIP(ip);
+    const ipHash = hashIP(ip);
 
     const { error: insertError } = await supabase.from('consents').insert({
       tenant_id: tenant.id,
@@ -89,11 +90,7 @@ function corsHeaders() {
   };
 }
 
-async function hashIP(ip: string): Promise<string> {
+function hashIP(ip: string): string {
   const salt = process.env.IP_HASH_SALT || 'ley21719-salt-default-secure';
-  const encoder = new TextEncoder();
-  const data = encoder.encode(ip + salt);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+  return crypto.createHash('sha256').update(ip + salt).digest('hex');
 }
