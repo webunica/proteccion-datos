@@ -17,7 +17,7 @@ import {
   Check,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import type { Tenant, Platform, Plan } from '@/types/shared';
+import type { Tenant, Platform, Plan, BadgePosition, BadgeStyle } from '@/types/shared';
 
 type BannerPosition = 'bottom' | 'top' | 'bottom-left' | 'bottom-right';
 
@@ -45,6 +45,12 @@ export function ClientEditForm({ initialTenant }: ClientEditFormProps) {
   const [bannerPosition, setBannerPosition] = useState<BannerPosition>(
     initialTenant.config?.banner?.position || 'bottom'
   );
+  const [badgePosition, setBadgePosition] = useState<BadgePosition>(
+    initialTenant.config?.banner?.badgePosition || 'middle-right'
+  );
+  const [badgeStyle, setBadgeStyle] = useState<BadgeStyle>(
+    initialTenant.config?.banner?.badgeStyle || 'retracted'
+  );
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -66,6 +72,8 @@ export function ClientEditForm({ initialTenant }: ClientEditFormProps) {
         }),
         primaryColor,
         position: bannerPosition,
+        badgePosition,
+        badgeStyle,
       },
     };
 
@@ -313,15 +321,20 @@ export function ClientEditForm({ initialTenant }: ClientEditFormProps) {
       </div>
 
       {/* 3. Personalización del Widget */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900 pb-3 border-b border-slate-100 flex items-center gap-2">
-          <Palette className="w-4 h-4 text-purple-600" />
-          Personalización Visual del Banner
-        </h2>
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-[0_1px_3px_0_rgba(15,23_42,0.03)] space-y-6">
+        <div className="pb-3 border-b border-slate-100 flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <Palette className="w-4 h-4 text-purple-600" />
+            Personalización Visual del Banner y Pestaña de Cookies
+          </h2>
+          <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+            Ley 21.719 Storefront
+          </span>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
-            <label className="text-xs font-semibold text-slate-700 block mb-1">Color Primario del Banner</label>
+            <label className="text-xs font-semibold text-slate-700 block mb-1">Color de Marca / Botones</label>
             <div className="flex items-center gap-2">
               <input
                 type="color"
@@ -339,7 +352,7 @@ export function ClientEditForm({ initialTenant }: ClientEditFormProps) {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-700 block mb-1">Posición en Pantalla</label>
+            <label className="text-xs font-semibold text-slate-700 block mb-1">Posición del Banner Inicial</label>
             <select
               value={bannerPosition}
               onChange={(e) => setBannerPosition(e.target.value as BannerPosition)}
@@ -351,6 +364,103 @@ export function ClientEditForm({ initialTenant }: ClientEditFormProps) {
               <option value="bottom-right">Flotante abajo derecha</option>
             </select>
           </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-700 block mb-1">
+              Ubicación del Icono / Pestaña de Cookies
+            </label>
+            <select
+              value={badgePosition}
+              onChange={(e) => setBadgePosition(e.target.value as BadgePosition)}
+              className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 text-sm bg-white"
+            >
+              <option value="middle-right">Lateral derecho centrado (Recomendado — a media altura)</option>
+              <option value="middle-left">Lateral izquierdo centrado (a media altura)</option>
+              <option value="bottom-right">Esquina inferior derecha</option>
+              <option value="bottom-left">Esquina inferior izquierda (Clásico)</option>
+            </select>
+            <p className="text-[11px] text-slate-500 mt-1">
+              Donde permanecerá el acceso para que el cliente pueda cambiar sus preferencias en cualquier momento.
+            </p>
+          </div>
+
+          <div>
+            <label className="text-xs font-semibold text-slate-700 block mb-1">
+              Comportamiento Visual de la Pestaña
+            </label>
+            <select
+              value={badgeStyle}
+              onChange={(e) => setBadgeStyle(e.target.value as BadgeStyle)}
+              className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 text-sm bg-white"
+            >
+              <option value="retracted">
+                Pestaña retráctil (Se esconde parcialmente en el borde hasta hacer hover o clic)
+              </option>
+              <option value="floating">Botón flotante completo permanente</option>
+            </select>
+            <p className="text-[11px] text-slate-500 mt-1">
+              En modo retráctil sólo asoma un sutil icono en el borde para no tapar carritos ni botones de WhatsApp.
+            </p>
+          </div>
+        </div>
+
+        {/* Simulador / Previsualización en Vivo */}
+        <div className="pt-2">
+          <label className="text-xs font-semibold text-slate-700 block mb-2">
+            Vista Previa en Tienda (Simulación de pantalla):
+          </label>
+          <div className="relative w-full h-44 bg-slate-900/5 rounded-xl border border-dashed border-slate-300 overflow-hidden flex flex-col justify-between p-3 select-none">
+            {/* Header simulado */}
+            <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+              <div className="flex items-center gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+                <div className="w-2.5 h-2.5 rounded-full bg-slate-300" />
+              </div>
+              <div className="text-[10px] text-slate-400 font-mono">
+                {name || 'mitienda.cl'}
+              </div>
+              <div className="w-10" />
+            </div>
+
+            {/* Contenido simulado de la tienda */}
+            <div className="flex-1 flex flex-col items-center justify-center opacity-40">
+              <div className="w-28 h-2 bg-slate-300 rounded mb-1" />
+              <div className="w-40 h-1.5 bg-slate-200 rounded" />
+            </div>
+
+            {/* Pestaña simulada en su posición real */}
+            <div
+              className={`absolute transition-all duration-300 cursor-pointer ${
+                badgePosition === 'middle-right'
+                  ? 'right-0 top-1/2 -translate-y-1/2'
+                  : badgePosition === 'middle-left'
+                  ? 'left-0 top-1/2 -translate-y-1/2'
+                  : badgePosition === 'bottom-right'
+                  ? 'bottom-2 right-3'
+                  : 'bottom-2 left-3'
+              }`}
+            >
+              <div
+                style={{ backgroundColor: primaryColor }}
+                className={`text-white text-[10px] font-medium flex items-center gap-1 shadow-md transition-all ${
+                  badgeStyle === 'retracted'
+                    ? badgePosition === 'middle-right'
+                      ? 'rounded-l-lg pl-2 pr-1.5 py-1 translate-x-1 hover:translate-x-0'
+                      : badgePosition === 'middle-left'
+                      ? 'rounded-r-lg pr-2 pl-1.5 py-1 -translate-x-1 hover:translate-x-0'
+                      : 'rounded-t-lg px-2 py-0.5 translate-y-0.5 hover:translate-y-0'
+                    : 'rounded-full px-2.5 py-1'
+                }`}
+              >
+                <span>🍪</span>
+                <span className="hidden sm:inline">Cookies</span>
+              </div>
+            </div>
+          </div>
+          <p className="text-[11px] text-slate-400 mt-1.5 text-center">
+            Mueve el mouse sobre la pestaña simulada para ver el efecto retráctil en el borde.
+          </p>
         </div>
       </div>
     </form>

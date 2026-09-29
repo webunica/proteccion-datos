@@ -20,12 +20,17 @@ export type BreachStatus = 'open' | 'investigating' | 'contained' | 'closed';
 // TENANT CONFIG
 // ============================================
 
+export type BadgePosition = 'middle-right' | 'middle-left' | 'bottom-right' | 'bottom-left';
+export type BadgeStyle = 'retracted' | 'floating';
+
 export interface BannerConfig {
   position: 'bottom' | 'top' | 'bottom-left' | 'bottom-right';
   primaryColor: string;
   textColor: string;
   backgroundColor: string;
   language: 'es' | 'en';
+  badgePosition?: BadgePosition;
+  badgeStyle?: BadgeStyle;
 }
 
 export interface CategoriesConfig {

@@ -35,6 +35,8 @@
   var fallbackOrigin = 'https://proteccion-datos-admin.vercel.app';
   var apiBaseUrl = (attr('data-api') || scriptSrcOrigin || fallbackOrigin).replace(/\/$/, '');
   var primaryColor = attr('data-color') || '#2563eb';
+  var badgePosition = attr('data-badge-position') || attr('data-badge-pos') || 'middle-right';
+  var badgeStyle = attr('data-badge-style') || 'retracted';
   var privacyUrl = attr('data-privacy-url') || '#politica-privacidad';
   var tenantName = attr('data-name') || 'esta tienda';
 
@@ -224,26 +226,117 @@
       .ley21719-category-desc { font-size: 12px; color: #6b7280; }
       #ley21719-floating-btn {
         position: fixed;
-        bottom: 16px;
-        left: 16px;
         z-index: 2147483630;
         background: ${primaryColor};
         color: #ffffff;
         border: none;
-        border-radius: 20px;
-        padding: 6px 14px;
-        font-size: 11px;
-        font-weight: 500;
+        outline: none;
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
         display: flex;
         align-items: center;
         gap: 6px;
-        font-family: inherit;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        box-shadow: 0 3px 12px rgba(0,0,0,0.18);
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, opacity 0.2s ease;
+        line-height: 1;
+        user-select: none;
       }
+      .ley-badge-icon { font-size: 13px; line-height: 1; display: inline-block; }
+      .ley-badge-text { white-space: nowrap; }
+
+      /* Middle Right (Lateral derecho a media altura) */
+      #ley21719-floating-btn.ley-pos-middle-right {
+        top: 50%;
+        right: 0;
+        transform: translateY(-50%);
+        border-radius: 8px 0 0 8px;
+        padding: 8px 12px 8px 10px;
+      }
+      #ley21719-floating-btn.ley-pos-middle-right.ley-style-retracted {
+        transform: translateY(-50%) translateX(calc(100% - 32px));
+        opacity: 0.88;
+      }
+      #ley21719-floating-btn.ley-pos-middle-right.ley-style-retracted:hover,
+      #ley21719-floating-btn.ley-pos-middle-right.ley-style-retracted:focus-visible {
+        transform: translateY(-50%) translateX(0);
+        opacity: 1;
+        box-shadow: -4px 6px 18px rgba(0,0,0,0.25);
+      }
+
+      /* Middle Left (Lateral izquierdo a media altura) */
+      #ley21719-floating-btn.ley-pos-middle-left {
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+        border-radius: 0 8px 8px 0;
+        padding: 8px 10px 8px 12px;
+      }
+      #ley21719-floating-btn.ley-pos-middle-left.ley-style-retracted {
+        transform: translateY(-50%) translateX(calc(-100% + 32px));
+        opacity: 0.88;
+      }
+      #ley21719-floating-btn.ley-pos-middle-left.ley-style-retracted:hover,
+      #ley21719-floating-btn.ley-pos-middle-left.ley-style-retracted:focus-visible {
+        transform: translateY(-50%) translateX(0);
+        opacity: 1;
+        box-shadow: 4px 6px 18px rgba(0,0,0,0.25);
+      }
+
+      /* Bottom Right */
+      #ley21719-floating-btn.ley-pos-bottom-right {
+        bottom: 16px;
+        right: 16px;
+        border-radius: 20px;
+        padding: 7px 14px;
+      }
+      #ley21719-floating-btn.ley-pos-bottom-right.ley-style-retracted {
+        bottom: 0;
+        right: 20px;
+        border-radius: 8px 8px 0 0;
+        padding: 6px 12px;
+        transform: translateY(calc(100% - 24px));
+        opacity: 0.88;
+      }
+      #ley21719-floating-btn.ley-pos-bottom-right.ley-style-retracted:hover,
+      #ley21719-floating-btn.ley-pos-bottom-right.ley-style-retracted:focus-visible {
+        transform: translateY(0);
+        opacity: 1;
+        box-shadow: 0 -4px 16px rgba(0,0,0,0.2);
+      }
+
+      /* Bottom Left */
+      #ley21719-floating-btn.ley-pos-bottom-left {
+        bottom: 16px;
+        left: 16px;
+        border-radius: 20px;
+        padding: 7px 14px;
+      }
+      #ley21719-floating-btn.ley-pos-bottom-left.ley-style-retracted {
+        bottom: 0;
+        left: 20px;
+        border-radius: 8px 8px 0 0;
+        padding: 6px 12px;
+        transform: translateY(calc(100% - 24px));
+        opacity: 0.88;
+      }
+      #ley21719-floating-btn.ley-pos-bottom-left.ley-style-retracted:hover,
+      #ley21719-floating-btn.ley-pos-bottom-left.ley-style-retracted:focus-visible {
+        transform: translateY(0);
+        opacity: 1;
+        box-shadow: 0 -4px 16px rgba(0,0,0,0.2);
+      }
+
       @media (max-width: 640px) {
         #ley21719-banner-inner { padding: 12px 16px; }
         #ley21719-banner-actions { width: 100%; justify-content: flex-end; }
+        #ley21719-floating-btn.ley-pos-middle-right.ley-style-retracted {
+          transform: translateY(-50%) translateX(calc(100% - 30px));
+        }
+        #ley21719-floating-btn.ley-pos-middle-left.ley-style-retracted {
+          transform: translateY(-50%) translateX(calc(-100% + 30px));
+        }
       }
     `;
     document.head.appendChild(style);
@@ -345,7 +438,10 @@
     injectStyles();
     var btn = document.createElement('button');
     btn.id = 'ley21719-floating-btn';
-    btn.innerHTML = '🍪 Gestionar cookies';
+    btn.className = 'ley-pos-' + badgePosition + ' ley-style-' + badgeStyle;
+    btn.setAttribute('aria-label', 'Gestionar cookies y privacidad');
+    btn.setAttribute('title', 'Gestionar cookies y privacidad');
+    btn.innerHTML = '<span class="ley-badge-icon">🍪</span><span class="ley-badge-text">Gestionar cookies</span>';
     btn.addEventListener('click', function () {
       btn.remove();
       createBanner();
@@ -462,6 +558,43 @@
     }
   }
 
+  // 6. Sincronización dinámica de configuración remota
+  function fetchWidgetConfig() {
+    if (!tenantSlug) return;
+    fetch(apiBaseUrl + '/api/config/' + encodeURIComponent(tenantSlug))
+      .then(function (res) {
+        if (!res.ok) return null;
+        return res.json();
+      })
+      .then(function (cfg) {
+        if (!cfg) return;
+        var changed = false;
+        if (cfg.primaryColor && cfg.primaryColor !== primaryColor) {
+          primaryColor = cfg.primaryColor;
+          changed = true;
+        }
+        if (cfg.badgePosition && cfg.badgePosition !== badgePosition) {
+          badgePosition = cfg.badgePosition;
+          changed = true;
+        }
+        if (cfg.badgeStyle && cfg.badgeStyle !== badgeStyle) {
+          badgeStyle = cfg.badgeStyle;
+          changed = true;
+        }
+        if (changed) {
+          var oldStyle = document.getElementById('ley21719-styles');
+          if (oldStyle) oldStyle.remove();
+          injectStyles();
+          var btn = document.getElementById('ley21719-floating-btn');
+          if (btn) {
+            btn.className = 'ley-pos-' + badgePosition + ' ley-style-' + badgeStyle;
+            btn.style.background = primaryColor;
+          }
+        }
+      })
+      .catch(function () {});
+  }
+
   // Inicialización
   function init() {
     var existing = getConsentState();
@@ -473,6 +606,7 @@
     }
     initRightsForms();
     initPolicyEmbed();
+    fetchWidgetConfig();
   }
 
   if (document.readyState === 'loading') {

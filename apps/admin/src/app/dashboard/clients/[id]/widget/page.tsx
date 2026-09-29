@@ -42,8 +42,10 @@ export default async function ClientWidgetPage({ params }: ClientWidgetPageProps
   const tenant = tenantData as Tenant;
   const widgetUrl = process.env.NEXT_PUBLIC_WIDGET_URL || 'https://proteccion-datos-admin.vercel.app';
   const primaryColor = tenant.config?.banner?.primaryColor || '#2563eb';
+  const badgePosition = tenant.config?.banner?.badgePosition || 'middle-right';
+  const badgeStyle = tenant.config?.banner?.badgeStyle || 'retracted';
 
-  const shopifySnippet = `<!-- Cumplimiento Ley 21.719 — ${tenant.name} -->\n<script\n  src="${widgetUrl}/widget.js"\n  data-tenant="${tenant.slug}"\n  data-api="${widgetUrl}"\n  data-color="${primaryColor}"\n  defer\n></script>`;
+  const shopifySnippet = `<!-- Cumplimiento Ley 21.719 — ${tenant.name} -->\n<script\n  src="${widgetUrl}/widget.js"\n  data-tenant="${tenant.slug}"\n  data-api="${widgetUrl}"\n  data-color="${primaryColor}"\n  data-badge-position="${badgePosition}"\n  data-badge-style="${badgeStyle}"\n  defer\n></script>`;
 
   const rightsSnippet = `<div id="ley21719-rights-form"></div>`;
   const policySnippet = `<div id="ley21719-policy"></div>`;
@@ -75,12 +77,12 @@ export default async function ClientWidgetPage({ params }: ClientWidgetPageProps
       </div>
 
       {/* Identificadores Rápidos */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div>
           <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
-            Tenant Slug (Identificador único)
+            Tenant Slug
           </label>
-          <p className="text-sm font-mono font-bold text-indigo-700 bg-indigo-50/60 border border-indigo-200/60 px-3 py-2 rounded-lg mt-1 select-all">
+          <p className="text-sm font-mono font-bold text-indigo-700 bg-indigo-50/60 border border-indigo-200/60 px-3 py-1.5 rounded-lg mt-1 select-all">
             {tenant.slug}
           </p>
         </div>
@@ -90,11 +92,34 @@ export default async function ClientWidgetPage({ params }: ClientWidgetPageProps
           </label>
           <div className="flex items-center gap-2 mt-1">
             <span
-              className="w-8 h-8 rounded-lg border border-slate-300 shadow-sm"
+              className="w-7 h-7 rounded-lg border border-slate-300 shadow-sm shrink-0"
               style={{ backgroundColor: primaryColor }}
             />
             <span className="text-sm font-mono text-slate-800 font-medium">{primaryColor}</span>
           </div>
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+            Ubicación Pestaña
+          </label>
+          <p className="text-xs font-semibold text-slate-800 mt-1 capitalize bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-200">
+            {badgePosition === 'middle-right'
+              ? 'Lateral Derecho (Medio)'
+              : badgePosition === 'middle-left'
+              ? 'Lateral Izquierdo (Medio)'
+              : badgePosition === 'bottom-right'
+              ? 'Inferior Derecho'
+              : 'Inferior Izquierdo'}
+          </p>
+        </div>
+        <div>
+          <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block">
+            Efecto Visual
+          </label>
+          <p className="text-xs font-semibold text-emerald-700 mt-1 capitalize bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-200 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            {badgeStyle === 'retracted' ? 'Pestaña Retráctil' : 'Flotante Continuo'}
+          </p>
         </div>
       </div>
 

@@ -22,6 +22,8 @@ import { createClient } from '@/lib/supabase/client';
 type Platform = 'shopify' | 'woocommerce' | 'other';
 type Plan = 'basic' | 'pro' | 'enterprise';
 type BannerPosition = 'bottom' | 'top' | 'bottom-left' | 'bottom-right';
+type BadgePosition = 'middle-right' | 'middle-left' | 'bottom-right' | 'bottom-left';
+type BadgeStyle = 'retracted' | 'floating';
 
 interface FormData {
   name: string;
@@ -35,6 +37,8 @@ interface FormData {
   plan: Plan;
   primary_color: string;
   banner_position: BannerPosition;
+  badge_position: BadgePosition;
+  badge_style: BadgeStyle;
 }
 
 const INITIAL: FormData = {
@@ -49,6 +53,8 @@ const INITIAL: FormData = {
   plan: 'pro',
   primary_color: '#2563eb',
   banner_position: 'bottom',
+  badge_position: 'middle-right',
+  badge_style: 'retracted',
 };
 
 function slugify(text: string) {
@@ -107,6 +113,8 @@ export default function NewClientPage() {
             textColor: '#111827',
             backgroundColor: '#ffffff',
             language: 'es',
+            badgePosition: form.badge_position,
+            badgeStyle: form.badge_style,
           },
           categories: {
             essential: true,
@@ -476,6 +484,28 @@ export default function NewClientPage() {
                   <option value="top">Superior</option>
                   <option value="bottom-left">Inferior izquierda</option>
                   <option value="bottom-right">Inferior derecha</option>
+                </select>
+              </Field>
+              <Field label="Ubicación icono de cookies" hint="Pestaña permanente para cambiar preferencias">
+                <select
+                  value={form.badge_position}
+                  onChange={e => set('badge_position', e.target.value as BadgePosition)}
+                  className={inputClass}
+                >
+                  <option value="middle-right">Lateral derecho centrado (Recomendado)</option>
+                  <option value="middle-left">Lateral izquierdo centrado</option>
+                  <option value="bottom-right">Esquina inferior derecha</option>
+                  <option value="bottom-left">Esquina inferior izquierda</option>
+                </select>
+              </Field>
+              <Field label="Comportamiento de la pestaña" hint="Efecto visual en la tienda">
+                <select
+                  value={form.badge_style}
+                  onChange={e => set('badge_style', e.target.value as BadgeStyle)}
+                  className={inputClass}
+                >
+                  <option value="retracted">Pestaña retráctil (se esconde parcialmente)</option>
+                  <option value="floating">Botón flotante completo</option>
                 </select>
               </Field>
             </div>
