@@ -130,18 +130,104 @@ export async function sendConsentToAPI(
 }
 
 // ---------------------------------------------------------------------------
+// Google Consent Mode v2 & Shopify Customer Privacy API
+// ---------------------------------------------------------------------------
+
+export function initGoogleConsentMode(): void {
+  const win = window as any;
+  win.dataLayer = win.dataLayer || [];
+  function gtag(...args: any[]) {
+    win.dataLayer.push(args);
+  }
+  if (!win.gtag) {
+    win.gtag = gtag;
+  }
+  const existing = getConsentState();
+  if (!existing) {
+    win.gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+      personalization_storage: 'denied',
+      functionality_storage: 'granted',
+      security_storage: 'granted',
+      wait_for_update: 500,
+    });
+  }
+}
+
+export function updateGoogleConsentMode(categories: ConsentState['categories']): void {
+  const win = window as any;
+  if (typeof win.gtag === 'function') {
+    win.gtag('consent', 'update', {
+      analytics_storage: categories.analytics ? 'granted' : 'denied',
+      ad_storage: categories.marketing ? 'granted' : 'denied',
+      ad_user_data: categories.marketing ? 'granted' : 'denied',
+      ad_personalization: categories.marketing ? 'granted' : 'denied',
+      personalization_storage: categories.personalization ? 'granted' : 'denied',
+    });
+  }
+}
+
+export function syncShopifyCustomerPrivacy(categories: ConsentState['categories']): void {
+  const win = window as any;
+  function applyShopify() {
+    try {
+      if (
+        win.Shopify &&
+        win.Shopify.customerPrivacy &&
+        typeof win.Shopify.customerPrivacy.setTrackingConsent === 'function'
+      ) {
+        win.Shopify.customerPrivacy.setTrackingConsent(
+          {
+            analytics: Boolean(categories.analytics),
+            marketing: Boolean(categories.marketing),
+            preferences: Boolean(categories.personalization),
+            sale_of_data: false,
+          },
+          () => {}
+        );
+      }
+    } catch {}
+  }
+
+  if (win.Shopify && typeof win.Shopify.loadFeatures === 'function') {
+    win.Shopify.loadFeatures(
+      [
+        {
+          name: 'consent-tracking-api',
+          version: '0.1',
+        },
+      ],
+      (error: any) => {
+        applyShopify();
+      }
+    );
+  } else {
+    applyShopify();
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Events
 // ---------------------------------------------------------------------------
 
 /**
- * Dispatches a `ley21719:consent` CustomEvent on `window` and pushes to the
- * GTM `dataLayer` (if present) so tag rules can react to the consent state.
+ * Dispatches a `ley21719:consent` CustomEvent on `window` and pushes to
+ * Google Consent Mode v2, Shopify Customer Privacy API, and GTM dataLayer.
  */
 export function dispatchConsentEvent(state: ConsentState): void {
-  // Custom DOM event — useful for any first-party listener
+  // Custom DOM event
   window.dispatchEvent(
     new CustomEvent('ley21719:consent', { detail: state }),
   );
+
+  // Google Consent Mode v2
+  updateGoogleConsentMode(state.categories);
+
+  // Shopify Customer Privacy API
+  syncShopifyCustomerPrivacy(state.categories);
 
   // Google Tag Manager dataLayer integration
   if ((window as any).dataLayer) {

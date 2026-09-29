@@ -24,6 +24,7 @@ import {
   hasValidConsent,
   sendConsentToAPI,
   dispatchConsentEvent,
+  initGoogleConsentMode,
 } from './consent';
 import { createBanner } from './banner';
 import { initRightsForm } from './rights-form';
@@ -194,6 +195,7 @@ import { initRightsForm } from './rights-form';
   // -------------------------------------------------------------------------
 
   function boot(): void {
+    initGoogleConsentMode();
     initBanner();
     initRightsForms();
   }

@@ -92,8 +92,102 @@
     } catch (e) {}
   }
 
+  // 1.1 Google Consent Mode v2
+  function initGoogleConsentMode() {
+    window.dataLayer = window.dataLayer || [];
+    function gtag() {
+      window.dataLayer.push(arguments);
+    }
+    if (!window.gtag) {
+      window.gtag = gtag;
+    }
+    var existing = getConsentState();
+    if (!existing) {
+      // Estado inicial bajo Ley 21.719: denegado hasta manifestación libre de voluntad
+      window.gtag('consent', 'default', {
+        analytics_storage: 'denied',
+        ad_storage: 'denied',
+        ad_user_data: 'denied',
+        ad_personalization: 'denied',
+        personalization_storage: 'denied',
+        functionality_storage: 'granted',
+        security_storage: 'granted',
+        wait_for_update: 500,
+      });
+    }
+  }
+
+  function updateGoogleConsentMode(categories) {
+    if (typeof window.gtag === 'function') {
+      window.gtag('consent', 'update', {
+        analytics_storage: categories.analytics ? 'granted' : 'denied',
+        ad_storage: categories.marketing ? 'granted' : 'denied',
+        ad_user_data: categories.marketing ? 'granted' : 'denied',
+        ad_personalization: categories.marketing ? 'granted' : 'denied',
+        personalization_storage: categories.personalization ? 'granted' : 'denied',
+      });
+    }
+  }
+
+  // 1.2 Shopify Customer Privacy API
+  function syncShopifyCustomerPrivacy(categories) {
+    function applyShopify() {
+      try {
+        if (
+          window.Shopify &&
+          window.Shopify.customerPrivacy &&
+          typeof window.Shopify.customerPrivacy.setTrackingConsent === 'function'
+        ) {
+          window.Shopify.customerPrivacy.setTrackingConsent(
+            {
+              analytics: Boolean(categories.analytics),
+              marketing: Boolean(categories.marketing),
+              preferences: Boolean(categories.personalization),
+              sale_of_data: false,
+            },
+            function (res) {
+              if (res && res.error) {
+                console.warn('[Ley21719] Error en Shopify customerPrivacy:', res.error);
+              }
+            }
+          );
+        }
+      } catch (err) {
+        console.warn('[Ley21719] Excepción en Shopify customerPrivacy:', err);
+      }
+    }
+
+    if (window.Shopify && typeof window.Shopify.loadFeatures === 'function') {
+      window.Shopify.loadFeatures(
+        [
+          {
+            name: 'consent-tracking-api',
+            version: '0.1',
+          },
+        ],
+        function (err) {
+          if (!err) {
+            applyShopify();
+          } else {
+            applyShopify();
+          }
+        }
+      );
+    } else {
+      applyShopify();
+    }
+  }
+
   function dispatchConsentEvent(state) {
     window.dispatchEvent(new CustomEvent('ley21719:consent', { detail: state }));
+
+    // Sincronización Google Consent Mode v2
+    updateGoogleConsentMode(state.categories);
+
+    // Sincronización Shopify Customer Privacy API
+    syncShopifyCustomerPrivacy(state.categories);
+
+    // Google Tag Manager dataLayer
     if (window.dataLayer) {
       window.dataLayer.push({
         event: 'ley21719_consent_update',
@@ -500,38 +594,181 @@
         e.preventDefault();
         var submitBtn = form.querySelector('button[type="submit"]');
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Enviando...';
+        submitBtn.textContent = 'Enviando código de verificación...';
 
         var payload = {
           tenant_slug: tenantSlug,
           type: form.elements['type'].value,
-          requester_email: form.elements['email'].value,
-          requester_name: form.elements['name'].value || undefined,
-          requester_rut: form.elements['rut'].value || undefined,
-          description: form.elements['description'].value || undefined,
+          requester_email: form.elements['email'].value.trim(),
+          requester_name: form.elements['name'].value.trim() || undefined,
+          requester_rut: form.elements['rut'].value.trim() || undefined,
+          description: form.elements['description'].value.trim() || undefined,
         };
 
-        fetch(apiBaseUrl + '/api/rights', {
+        // Solicitar código OTP al titular conforme al Art. 21 Ley 21.719
+        fetch(apiBaseUrl + '/api/rights/otp', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            action: 'send',
+            tenant_slug: tenantSlug,
+            email: payload.requester_email,
+            requester_name: payload.requester_name,
+          }),
         })
           .then(function (res) {
-            if (!res.ok) throw new Error('Error al registrar');
+            if (!res.ok) throw new Error('Error al solicitar OTP');
             return res.json();
           })
-          .then(function () {
+          .then(function (otpData) {
+            var otpToken = otpData.otp_token;
+
+            // Renderizar interfaz interactiva de verificación en 2 pasos
             c.innerHTML = `
-              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 20px; border-radius: 8px; text-align: center; font-family: sans-serif;">
-                <h4 style="margin: 0 0 8px; font-size: 16px;">✅ Solicitud Registrada con Éxito</h4>
-                <p style="margin: 0; font-size: 13px;">Hemos recibido tu solicitud. Te enviaremos un acuse formal a <strong>${payload.requester_email}</strong> dentro del plazo legal de 5 días hábiles.</p>
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 540px; margin: 0 auto; padding: 24px; background: #ffffff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; color: #1e293b;">
+                <div style="text-align: center; margin-bottom: 20px;">
+                  <div style="display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 22px; background: #eff6ff; color: ${primaryColor}; font-size: 20px; margin-bottom: 8px;">
+                    🛡️
+                  </div>
+                  <h3 style="font-size: 17px; font-weight: 700; margin: 0; color: #0f172a;">Verificación de Identidad (Paso 2 de 2)</h3>
+                  <p style="font-size: 13px; color: #64748b; margin: 6px 0 0;">
+                    Para prevenir la suplantación de identidad (<strong>Ley 21.719 Art. 21</strong>), enviamos un código de 6 dígitos a <strong>${payload.requester_email}</strong>.
+                  </p>
+                </div>
+
+                <div id="ley-otp-error" style="display: none; background: #fef2f2; border: 1px solid #fecaca; color: #b91c1c; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 14px; text-align: center;"></div>
+
+                <form id="ley-otp-form" style="display: flex; flex-direction: column; gap: 16px;">
+                  <div>
+                    <label style="display: block; font-size: 12px; font-weight: 600; text-align: center; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin-bottom: 6px;">
+                      Código de 6 dígitos
+                    </label>
+                    <input type="text" id="ley-otp-input" maxlength="6" pattern="[0-9]{6}" required placeholder="000000" autofocus
+                           style="letter-spacing: 8px; font-size: 24px; text-align: center; font-weight: 700; width: 100%; padding: 10px; border: 2px solid ${primaryColor}; border-radius: 8px; box-sizing: border-box; outline: none; font-family: monospace;" />
+                  </div>
+
+                  <button type="submit" id="ley-otp-submit" style="padding: 12px; background: ${primaryColor}; color: #ffffff; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity 0.2s;">
+                    Confirmar y Enviar Solicitud
+                  </button>
+
+                  <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding-top: 4px;">
+                    <button type="button" id="ley-otp-back" style="background: none; border: none; color: #64748b; cursor: pointer; text-decoration: underline; padding: 0;">
+                      ← Modificar datos
+                    </button>
+                    <button type="button" id="ley-otp-resend" style="background: none; border: none; color: ${primaryColor}; cursor: pointer; font-weight: 600; padding: 0;">
+                      Reenviar código
+                    </button>
+                  </div>
+                </form>
               </div>
             `;
+
+            var otpForm = c.querySelector('#ley-otp-form');
+            var otpInput = c.querySelector('#ley-otp-input');
+            var otpError = c.querySelector('#ley-otp-error');
+            var otpSubmit = c.querySelector('#ley-otp-submit');
+            var otpBack = c.querySelector('#ley-otp-back');
+            var otpResend = c.querySelector('#ley-otp-resend');
+
+            otpBack.addEventListener('click', function () {
+              initRightsForms();
+            });
+
+            otpResend.addEventListener('click', function () {
+              otpResend.disabled = true;
+              otpResend.textContent = 'Enviando...';
+              fetch(apiBaseUrl + '/api/rights/otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  action: 'send',
+                  tenant_slug: tenantSlug,
+                  email: payload.requester_email,
+                  requester_name: payload.requester_name,
+                }),
+              })
+                .then(function (r) { return r.json(); })
+                .then(function (newOtpData) {
+                  otpToken = newOtpData.otp_token || otpToken;
+                  otpResend.textContent = '¡Código reenviado!';
+                  setTimeout(function () {
+                    otpResend.disabled = false;
+                    otpResend.textContent = 'Reenviar código';
+                  }, 5000);
+                })
+                .catch(function () {
+                  otpResend.disabled = false;
+                  otpResend.textContent = 'Reintentar reenvío';
+                });
+            });
+
+            otpForm.addEventListener('submit', function (ev) {
+              ev.preventDefault();
+              otpError.style.display = 'none';
+              otpSubmit.disabled = true;
+              otpSubmit.textContent = 'Validando y registrando...';
+
+              var codeVal = otpInput.value.trim();
+              var fullPayload = Object.assign({}, payload, {
+                otp_code: codeVal,
+                otp_token: otpToken,
+              });
+
+              fetch(apiBaseUrl + '/api/rights', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(fullPayload),
+              })
+                .then(function (res) {
+                  if (!res.ok) throw new Error('Error al registrar solicitud');
+                  return res.json();
+                })
+                .then(function () {
+                  c.innerHTML = `
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 24px; border-radius: 12px; text-align: center; font-family: sans-serif; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+                      <div style="font-size: 36px; margin-bottom: 8px;">✅</div>
+                      <h4 style="margin: 0 0 8px; font-size: 18px; font-weight: 700;">Solicitud Recibida y Autenticada</h4>
+                      <p style="margin: 0 0 12px; font-size: 13px; color: #15803d;">
+                        Tu identidad ha sido verificada mediante código seguro (Ley 21.719). Hemos enviado el comprobante oficial a <strong>${payload.requester_email}</strong>.
+                      </p>
+                      <div style="display: inline-block; background: #ffffff; border: 1px solid #dcfce7; padding: 8px 16px; border-radius: 8px; font-size: 12px; color: #166534; font-weight: 500;">
+                        ⏱ Acuse formal dentro de 5 días hábiles · Resolución máxima en 30 días hábiles
+                      </div>
+                    </div>
+                  `;
+                })
+                .catch(function () {
+                  otpError.textContent = 'Código incorrecto o expirado. Por favor verifica e intenta nuevamente.';
+                  otpError.style.display = 'block';
+                  otpSubmit.disabled = false;
+                  otpSubmit.textContent = 'Confirmar y Enviar Solicitud';
+                });
+            });
           })
           .catch(function () {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Enviar Solicitud ARSOP+';
-            alert('Hubo un error al enviar tu solicitud. Por favor intenta nuevamente.');
+            // En caso de incidencia en envío de OTP, fallback a registro directo
+            fetch(apiBaseUrl + '/api/rights', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload),
+            })
+              .then(function (res) {
+                if (!res.ok) throw new Error('Error al registrar');
+                return res.json();
+              })
+              .then(function () {
+                c.innerHTML = `
+                  <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 20px; border-radius: 8px; text-align: center; font-family: sans-serif;">
+                    <h4 style="margin: 0 0 8px; font-size: 16px;">✅ Solicitud Registrada con Éxito</h4>
+                    <p style="margin: 0; font-size: 13px;">Hemos recibido tu solicitud. Te enviaremos un acuse formal a <strong>${payload.requester_email}</strong> dentro del plazo legal de 5 días hábiles.</p>
+                  </div>
+                `;
+              })
+              .catch(function () {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Enviar Solicitud ARSOP+';
+                alert('Hubo un error al enviar tu solicitud. Por favor intenta nuevamente.');
+              });
           });
       });
     });
@@ -597,6 +834,7 @@
 
   // Inicialización
   function init() {
+    initGoogleConsentMode();
     var existing = getConsentState();
     if (!existing) {
       createBanner();

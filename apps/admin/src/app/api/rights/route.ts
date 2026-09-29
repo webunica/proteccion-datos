@@ -14,11 +14,41 @@ function getAdminClient() {
   return createClient(supabaseUrl, supabaseServiceKey);
 }
 
+async function verifyOtp(email: string, otpCode?: string, otpToken?: string): Promise<boolean> {
+  if (!otpCode || !otpToken) return false;
+  try {
+    const parts = String(otpToken).split('.');
+    if (parts.length !== 2) return false;
+    const [expiryStr, receivedSignature] = parts;
+    if (Date.now() > Number(expiryStr)) return false;
+    const secret = process.env.IP_HASH_SALT || 'ley21719-otp-secret-key-32chars';
+    const enc = new TextEncoder();
+    const key = await crypto.subtle.importKey(
+      'raw',
+      enc.encode(secret),
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign']
+    );
+    const signature = await crypto.subtle.sign(
+      'HMAC',
+      key,
+      enc.encode(`${email.toLowerCase().trim()}:${otpCode.trim()}:${expiryStr}`)
+    );
+    const expected = Array.from(new Uint8Array(signature))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+    return expected === receivedSignature;
+  } catch {
+    return false;
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = getAdminClient();
-    const body: RightsRequestPostBody = await request.json();
-    const { tenant_slug, type, requester_email, requester_name, requester_rut, description } = body;
+    const body: RightsRequestPostBody & { otp_code?: string; otp_token?: string } = await request.json();
+    const { tenant_slug, type, requester_email, requester_name, requester_rut, description, otp_code, otp_token } = body;
 
     if (!tenant_slug || !type || !requester_email) {
       return NextResponse.json(
@@ -50,6 +80,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const isOtpVerified = await verifyOtp(requester_email, otp_code, otp_token);
+
     // Insertar solicitud en base de datos
     const { data: inserted, error: insertError } = await supabase
       .from('rights_requests')
@@ -61,6 +93,7 @@ export async function POST(request: NextRequest) {
         requester_rut: requester_rut || null,
         description: description || null,
         status: 'received',
+        evidence_url: isOtpVerified ? 'otp:verified' : null,
       })
       .select()
       .single();
@@ -82,6 +115,7 @@ export async function POST(request: NextRequest) {
       metadata: {
         type,
         requester_email,
+        identity_verified: isOtpVerified,
       },
     });
 

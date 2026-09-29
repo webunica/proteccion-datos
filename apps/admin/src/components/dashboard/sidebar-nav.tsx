@@ -10,6 +10,7 @@ import {
   ClipboardList,
   FileText,
   AlertTriangle,
+  FileCheck,
   Settings,
   LogOut,
   ChevronRight,
@@ -56,6 +57,11 @@ const navItems: NavItem[] = [
     href: '/dashboard/breach',
     label: 'Gestión de Brechas',
     icon: AlertTriangle,
+  },
+  {
+    href: '/dashboard/dpa',
+    label: 'Contratos Encargo (DPA)',
+    icon: FileCheck,
   },
   {
     href: '/dashboard/settings',

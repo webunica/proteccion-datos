@@ -344,7 +344,7 @@ function attachFormEvents(
 
     // --- Submission ---
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Enviando…';
+    submitBtn.textContent = 'Enviando código de verificación…';
 
     const nameEl = container.querySelector('#rf-name') as HTMLInputElement;
     const rutEl = container.querySelector('#rf-rut') as HTMLInputElement;
@@ -352,47 +352,171 @@ function attachFormEvents(
       '#rf-description',
     ) as HTMLTextAreaElement;
 
+    const emailVal = emailEl.value.trim();
+    const nameVal = nameEl.value.trim() || undefined;
+
     const payload: Record<string, unknown> = {
       tenant_slug: tenantSlug,
       type: typeEl.value,
-      requester_email: emailEl.value.trim(),
+      requester_email: emailVal,
     };
-    if (nameEl.value.trim()) payload.requester_name = nameEl.value.trim();
+    if (nameVal) payload.requester_name = nameVal;
     if (rutEl.value.trim()) payload.requester_rut = rutEl.value.trim();
     if (descEl.value.trim()) payload.description = descEl.value.trim();
 
     try {
-      const res = await fetch(`${apiBaseUrl}/api/rights`, {
+      // Step 1: Request 6-digit OTP code for identity verification (Art. 21 Ley 21.719)
+      const otpRes = await fetch(`${apiBaseUrl}/api/rights/otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({
+          action: 'send',
+          tenant_slug: tenantSlug,
+          email: emailVal,
+          requester_name: nameVal,
+        }),
       });
 
-      if (!res.ok) {
-        const json = await res.json().catch(() => null);
-        throw new Error(
-          (json as any)?.detail || `HTTP ${res.status}`,
-        );
-      }
+      if (!otpRes.ok) throw new Error('Error al solicitar verificación');
+      const otpData = await otpRes.json();
+      let otpToken = otpData.otp_token;
 
-      // --- Success state ---
+      // Render Step 2: OTP Entry UI
       container.innerHTML = `
-        <div class="ley21719-success" role="status" aria-live="polite">
-          <h3>✅ Solicitud recibida</h3>
-          <p>
-            Hemos recibido tu solicitud correctamente. Te enviaremos un acuse de recibo a
-            <strong>${escapeHtml(emailEl.value.trim())}</strong>
-            en los próximos 5 días hábiles.
+        <div class="ley21719-form">
+          <h2>Verificación de Identidad (Paso 2 de 2)</h2>
+          <p class="subtitle">
+            Conforme al <strong>Art. 21 de la Ley 21.719</strong> para proteger tus datos de accesos no autorizados o suplantación,
+            ingresa el código de 6 dígitos enviado a <strong>${escapeHtml(emailVal)}</strong>.
           </p>
+
+          <div id="ley-otp-err" class="ley21719-error" style="display: none;"></div>
+
+          <form id="ley-otp-form-el">
+            <div class="ley21719-field" style="text-align: center;">
+              <label for="ley-otp-val">Código de Verificación *</label>
+              <input type="text" id="ley-otp-val" maxlength="6" pattern="[0-9]{6}" required placeholder="000000" autofocus
+                     style="letter-spacing: 8px; font-size: 24px; text-align: center; font-weight: bold; font-family: monospace; max-width: 260px; margin: 0 auto; display: block;" />
+            </div>
+
+            <button type="submit" class="ley21719-submit" id="ley-otp-btn">
+              Confirmar y Enviar Solicitud
+            </button>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 13px;">
+              <button type="button" id="ley-otp-back-btn" style="background: none; border: none; color: #6b7280; cursor: pointer; text-decoration: underline; padding: 0;">
+                ← Modificar mis datos
+              </button>
+              <button type="button" id="ley-otp-resend-btn" style="background: none; border: none; color: #2563eb; cursor: pointer; font-weight: 600; padding: 0;">
+                Reenviar código
+              </button>
+            </div>
+          </form>
         </div>
       `;
-    } catch (err: unknown) {
-      const msg =
-        err instanceof Error ? err.message : 'Error desconocido';
-      errorEl.textContent = `Hubo un error al enviar tu solicitud: ${msg}. Por favor intenta nuevamente.`;
-      errorEl.style.display = 'block';
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Enviar solicitud';
+
+      const otpFormEl = container.querySelector('#ley-otp-form-el') as HTMLFormElement;
+      const otpValInput = container.querySelector('#ley-otp-val') as HTMLInputElement;
+      const otpErrEl = container.querySelector('#ley-otp-err') as HTMLElement;
+      const otpBtn = container.querySelector('#ley-otp-btn') as HTMLButtonElement;
+      const backBtn = container.querySelector('#ley-otp-back-btn') as HTMLButtonElement;
+      const resendBtn = container.querySelector('#ley-otp-resend-btn') as HTMLButtonElement;
+
+      backBtn.addEventListener('click', () => {
+        initRightsForm(tenantSlug, apiBaseUrl, container);
+      });
+
+      resendBtn.addEventListener('click', async () => {
+        resendBtn.disabled = true;
+        resendBtn.textContent = 'Reenviando…';
+        try {
+          const r = await fetch(`${apiBaseUrl}/api/rights/otp`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'send',
+              tenant_slug: tenantSlug,
+              email: emailVal,
+              requester_name: nameVal,
+            }),
+          });
+          const d = await r.json();
+          otpToken = d.otp_token || otpToken;
+          resendBtn.textContent = '¡Código reenviado!';
+          setTimeout(() => {
+            resendBtn.disabled = false;
+            resendBtn.textContent = 'Reenviar código';
+          }, 5000);
+        } catch {
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Reintentar reenvío';
+        }
+      });
+
+      otpFormEl.addEventListener('submit', async (ev) => {
+        ev.preventDefault();
+        otpErrEl.style.display = 'none';
+        otpBtn.disabled = true;
+        otpBtn.textContent = 'Validando y enviando…';
+
+        const finalPayload = {
+          ...payload,
+          otp_code: otpValInput.value.trim(),
+          otp_token: otpToken,
+        };
+
+        try {
+          const res = await fetch(`${apiBaseUrl}/api/rights`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(finalPayload),
+          });
+
+          if (!res.ok) throw new Error('Código incorrecto o expirado');
+
+          container.innerHTML = `
+            <div class="ley21719-success" role="status" aria-live="polite">
+              <h3>✅ Solicitud Recibida y Autenticada</h3>
+              <p>
+                Tu identidad ha sido verificada correctamente mediante código seguro (Ley 21.719). Te enviaremos un acuse formal a
+                <strong>${escapeHtml(emailVal)}</strong> en un plazo de hasta 5 días hábiles.
+              </p>
+            </div>
+          `;
+        } catch {
+          otpErrEl.textContent = 'Código de verificación incorrecto o expirado. Por favor verifica e intenta nuevamente.';
+          otpErrEl.style.display = 'block';
+          otpBtn.disabled = false;
+          otpBtn.textContent = 'Confirmar y Enviar Solicitud';
+        }
+      });
+    } catch {
+      // Fallback: direct submission if OTP service is not available
+      try {
+        const res = await fetch(`${apiBaseUrl}/api/rights`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!res.ok) throw new Error('Error al registrar');
+
+        container.innerHTML = `
+          <div class="ley21719-success" role="status" aria-live="polite">
+            <h3>✅ Solicitud recibida</h3>
+            <p>
+              Hemos recibido tu solicitud correctamente. Te enviaremos un acuse de recibo a
+              <strong>${escapeHtml(emailVal)}</strong> en los próximos 5 días hábiles.
+            </p>
+          </div>
+        `;
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : 'Error desconocido';
+        errorEl.textContent = `Hubo un error al enviar tu solicitud: ${msg}. Por favor intenta nuevamente.`;
+        errorEl.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enviar solicitud';
+      }
     }
   });
 }

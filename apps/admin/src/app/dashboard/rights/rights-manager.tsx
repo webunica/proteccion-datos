@@ -253,8 +253,14 @@ export function RightsManager({ initialRequests }: RightsManagerProps) {
                       className="hover:bg-slate-50/80 transition-colors cursor-pointer group"
                     >
                       <td className="py-3.5 px-4">
-                        <div className="font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
-                          {req.requester_name || 'Sin nombre'}
+                        <div className="flex items-center gap-1.5 font-semibold text-slate-900 group-hover:text-blue-600 transition-colors">
+                          <span>{req.requester_name || 'Sin nombre'}</span>
+                          {req.evidence_url === 'otp:verified' && (
+                            <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300" title="Identidad Verificada con OTP 2FA">
+                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                              OTP
+                            </span>
+                          )}
                         </div>
                         <div className="text-xs font-mono text-slate-500">{req.requester_email}</div>
                         {req.requester_rut && (
@@ -393,6 +399,25 @@ export function RightsManager({ initialRequests }: RightsManagerProps) {
                   </span>
                 </div>
               </div>
+
+              {/* Verificación de Identidad Ley 21.719 */}
+              {selectedReq.evidence_url === 'otp:verified' ? (
+                <div className="flex items-center gap-2.5 p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div>
+                    <strong className="block text-emerald-950 font-semibold">Identidad Verificada vía Código OTP (2FA)</strong>
+                    <span>El solicitante autenticó la titularidad del correo electrónico conforme al Art. 21 de la Ley 21.719.</span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2.5 p-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-xl text-xs font-medium">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <div>
+                    <strong className="block text-amber-950 font-semibold">Verificación Tradicional Requerida</strong>
+                    <span>Solicitud ingresada sin confirmación OTP directa. Se recomienda solicitar documento o confirmación por email antes de entregar o suprimir información sensible.</span>
+                  </div>
+                </div>
+              )}
 
               {/* Descripción de la Solicitud */}
               <div>
