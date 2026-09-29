@@ -33,16 +33,16 @@ const TEXTS = {
       'Puedes elegir qué cookies aceptar. Más información en nuestra',
     privacyLink: 'política de privacidad',
     acceptAll: 'Aceptar todo',
-    essentialOnly: 'Solo esenciales',
+    essentialOnly: 'Rechazar opcionales',
     customize: 'Personalizar',
     save: 'Guardar preferencias',
-    essential: 'Esenciales',
+    essential: 'Esenciales (Obligatorias)',
     essentialDesc:
       'Necesarias para el funcionamiento básico de la tienda. No se pueden desactivar.',
-    analytics: 'Analítica',
+    analytics: 'Analítica (Opcional)',
     analyticsDesc:
       'Nos ayudan a entender cómo usas la tienda para mejorar tu experiencia.',
-    marketing: 'Marketing',
+    marketing: 'Marketing (Opcional)',
     marketingDesc:
       'Permiten mostrarte publicidad relevante en otras plataformas.',
     managePrefs: 'Gestionar cookies',
@@ -301,7 +301,6 @@ function buildBannerHTML(config: BannerConfig): HTMLElement {
               type="checkbox"
               id="cat-analytics"
               name="cat-analytics"
-              checked
               aria-describedby="cat-analytics-desc"
             />
             <label for="cat-analytics">

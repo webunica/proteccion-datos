@@ -366,16 +366,16 @@
               </label>
             </div>
             <div class="ley21719-category">
-              <input type="checkbox" id="cat-analytics" checked />
+              <input type="checkbox" id="cat-analytics" />
               <label for="cat-analytics">
-                <div class="ley21719-category-title">📊 Analíticas</div>
+                <div class="ley21719-category-title">📊 Analíticas (Opcional)</div>
                 <div class="ley21719-category-desc">Medición anónima de rendimiento de visitas para optimizar la tienda.</div>
               </label>
             </div>
             <div class="ley21719-category">
               <input type="checkbox" id="cat-marketing" />
               <label for="cat-marketing">
-                <div class="ley21719-category-title">📣 Marketing y Publicidad</div>
+                <div class="ley21719-category-title">📣 Marketing y Publicidad (Opcional)</div>
                 <div class="ley21719-category-desc">Personalización de anuncios en plataformas externas (ej. Meta, Google).</div>
               </label>
             </div>
@@ -383,7 +383,7 @@
         </div>
         <div id="ley21719-banner-actions">
           <button class="ley21719-btn ley21719-btn-text" id="ley21719-customize">Personalizar</button>
-          <button class="ley21719-btn ley21719-btn-secondary" id="ley21719-essential-only">Solo esenciales</button>
+          <button class="ley21719-btn ley21719-btn-secondary" id="ley21719-essential-only">Rechazar opcionales</button>
           <button class="ley21719-btn ley21719-btn-primary" id="ley21719-accept-all">Aceptar todo</button>
         </div>
       </div>
