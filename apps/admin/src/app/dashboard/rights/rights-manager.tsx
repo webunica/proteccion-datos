@@ -36,6 +36,7 @@ export function RightsManager({ initialRequests }: RightsManagerProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [selectedReq, setSelectedReq] = useState<RequestWithTenant | null>(null);
   const [resolutionNote, setResolutionNote] = useState('');
+  const [notifyByEmail, setNotifyByEmail] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
@@ -62,6 +63,7 @@ export function RightsManager({ initialRequests }: RightsManagerProps) {
   function handleOpenModal(req: RequestWithTenant) {
     setSelectedReq(req);
     setResolutionNote(req.resolution_note || '');
+    setNotifyByEmail(true);
     setFeedback(null);
   }
 
@@ -75,38 +77,53 @@ export function RightsManager({ initialRequests }: RightsManagerProps) {
     setIsUpdating(true);
     setFeedback(null);
 
-    const now = new Date().toISOString();
-    const updatePayload: Partial<RightsRequest> = {
-      status: newStatus,
-      updated_at: now,
-    };
+    try {
+      const res = await fetch('/api/rights/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          request_id: selectedReq.id,
+          new_status: newStatus,
+          resolution_note: resolutionNote,
+          send_email: notifyByEmail,
+        }),
+      });
 
-    if (newStatus === 'acknowledged' && !selectedReq.acknowledged_at) {
-      updatePayload.acknowledged_at = now;
-    }
+      const resData = await res.json();
+      if (!res.ok) {
+        throw new Error(resData?.error || 'Error al actualizar solicitud');
+      }
 
-    if (newStatus === 'resolved' || newStatus === 'rejected') {
-      updatePayload.resolved_at = now;
-      updatePayload.resolution_note = resolutionNote;
-    }
+      const now = new Date().toISOString();
+      const updated: RequestWithTenant = {
+        ...selectedReq,
+        status: newStatus,
+        updated_at: now,
+        ...(newStatus === 'acknowledged' && !selectedReq.acknowledged_at ? { acknowledged_at: now } : {}),
+        ...(newStatus === 'resolved' || newStatus === 'rejected'
+          ? { resolved_at: now, resolution_note: resolutionNote }
+          : resolutionNote
+          ? { resolution_note: resolutionNote }
+          : {}),
+      };
 
-    const { error } = await supabase
-      .from('rights_requests')
-      .update(updatePayload)
-      .eq('id', selectedReq.id);
+      setRequests((prev) => prev.map((r) => (r.id === selectedReq.id ? updated : r)));
+      setSelectedReq(updated);
 
-    if (error) {
-      setFeedback({ type: 'error', message: `Error al actualizar: ${error.message}` });
+      const emailNote = notifyByEmail
+        ? resData.email_sent
+          ? ' (Notificación enviada por email)'
+          : ` (${resData.email_detail})`
+        : '';
+      setFeedback({
+        type: 'success',
+        message: `Estado actualizado a "${RIGHTS_STATUS_LABELS[newStatus]}"${emailNote}`,
+      });
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: `Error al actualizar: ${err.message}` });
+    } finally {
       setIsUpdating(false);
-      return;
     }
-
-    // Actualizar local state
-    const updated = { ...selectedReq, ...updatePayload };
-    setRequests((prev) => prev.map((r) => (r.id === selectedReq.id ? updated : r)));
-    setSelectedReq(updated);
-    setFeedback({ type: 'success', message: `Estado actualizado a "${RIGHTS_STATUS_LABELS[newStatus]}"` });
-    setIsUpdating(false);
   }
 
   function formatDateTime(dateStr?: string | null) {
@@ -482,6 +499,26 @@ export function RightsManager({ initialRequests }: RightsManagerProps) {
                   placeholder="Describe las medidas adoptadas (ej: 'Se eliminaron los registros de la base de clientes y marketing según Art. 16 Ley 21.719')..."
                   className="w-full px-3.5 py-2 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
                 />
+              </div>
+
+              {/* Notificación Automática por Email */}
+              <div className="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  id="notifyByEmailCheckbox"
+                  checked={notifyByEmail}
+                  onChange={(e) => setNotifyByEmail(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded text-blue-600 focus:ring-blue-500 border-slate-300 cursor-pointer"
+                />
+                <label htmlFor="notifyByEmailCheckbox" className="text-xs cursor-pointer select-none">
+                  <span className="font-semibold text-slate-800 flex items-center gap-1.5">
+                    <Mail className="w-3.5 h-3.5 text-blue-600" />
+                    Enviar notificación formal por correo electrónico al titular
+                  </span>
+                  <span className="text-slate-500 block mt-0.5">
+                    Destinatario: <strong className="font-mono text-slate-700">{selectedReq.requester_email}</strong>. Despacha el acuse o resolución con la fundamentación legal y número de folio según Ley 21.719.
+                  </span>
+                </label>
               </div>
 
               {/* Botones de Cambio de Estado */}

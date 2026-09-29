@@ -795,7 +795,28 @@
     }
   }
 
-  // 6. Sincronización dinámica de configuración remota
+  // 7. Sello de Confianza Ley 21.719 en Footer
+  function initTrustBadge() {
+    var badges = document.querySelectorAll('#ley21719-trust-badge, [data-ley21719-badge]');
+    if (!badges || badges.length === 0) return;
+
+    var verifyUrl = apiBaseUrl + '/verify/' + encodeURIComponent(tenantSlug);
+    var badgeHtml =
+      '<a href="' + verifyUrl + '" target="_blank" rel="noopener noreferrer" style="' +
+      'display:inline-flex; align-items:center; gap:8px; padding:6px 14px; background:#ffffff; ' +
+      'border:1px solid #cbd5e1; border-radius:24px; text-decoration:none; font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif; ' +
+      'font-size:12px; font-weight:600; color:#1e3a8a; box-shadow:0 1px 4px rgba(0,0,0,0.06); transition:transform 0.15s, box-shadow 0.15s;' +
+      '">' +
+      '<span style="display:inline-block; width:8px; height:8px; border-radius:50%; background:#10b981;"></span>' +
+      '<span>🛡️ Empresa Verificada · Ley 21.719</span>' +
+      '</a>';
+
+    for (var i = 0; i < badges.length; i++) {
+      badges[i].innerHTML = badgeHtml;
+    }
+  }
+
+  // 8. Sincronización dinámica de configuración remota
   function fetchWidgetConfig() {
     if (!tenantSlug) return;
     fetch(apiBaseUrl + '/api/config/' + encodeURIComponent(tenantSlug))
@@ -844,6 +865,7 @@
     }
     initRightsForms();
     initPolicyEmbed();
+    initTrustBadge();
     fetchWidgetConfig();
   }
 

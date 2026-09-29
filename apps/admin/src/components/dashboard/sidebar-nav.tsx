@@ -11,6 +11,8 @@ import {
   FileText,
   AlertTriangle,
   FileCheck,
+  Award,
+  Scale,
   Settings,
   LogOut,
   ChevronRight,
@@ -62,6 +64,16 @@ const navItems: NavItem[] = [
     href: '/dashboard/dpa',
     label: 'Contratos Encargo (DPA)',
     icon: FileCheck,
+  },
+  {
+    href: '/dashboard/certificate',
+    label: 'Sello & Certificado',
+    icon: Award,
+  },
+  {
+    href: '/dashboard/eipd',
+    label: 'Evaluación EIPD (Art. 25)',
+    icon: Scale,
   },
   {
     href: '/dashboard/settings',
