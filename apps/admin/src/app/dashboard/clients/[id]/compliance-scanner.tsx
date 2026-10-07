@@ -11,6 +11,8 @@ import {
   Globe,
   Radio,
   ExternalLink,
+  Plus,
+  Zap,
 } from 'lucide-react';
 
 interface CheckItem {
@@ -41,6 +43,25 @@ export function ComplianceScanner({ tenantSlug, initialWebsite }: ComplianceScan
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [seedingRat, setSeedingRat] = useState(false);
+
+  async function handleSeedRat() {
+    setSeedingRat(true);
+    try {
+      const res = await fetch('/api/rat/seed', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tenant_slug: tenantSlug }),
+      });
+      if (res.ok) {
+        await runAudit();
+      }
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setSeedingRat(false);
+    }
+  }
 
   async function runAudit() {
     setLoading(true);
@@ -204,6 +225,17 @@ export function ComplianceScanner({ tenantSlug, initialWebsite }: ComplianceScan
                   {c.title}
                 </p>
                 <p className="text-[11px] text-slate-500 mt-0.5">{c.description}</p>
+                {c.id === 'rat' && !c.passed && (
+                  <button
+                    type="button"
+                    onClick={handleSeedRat}
+                    disabled={seedingRat}
+                    className="mt-2.5 inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-[11px] font-semibold transition shadow-xs cursor-pointer"
+                  >
+                    <Plus className={`w-3.5 h-3.5 ${seedingRat ? 'animate-spin' : ''}`} />
+                    {seedingRat ? 'Cargando tratamientos...' : 'Cargar 8 tratamientos estándar (1 clic)'}
+                  </button>
+                )}
               </div>
             </div>
           ))}

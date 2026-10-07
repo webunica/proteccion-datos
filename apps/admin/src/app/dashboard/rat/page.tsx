@@ -12,6 +12,7 @@ import {
 import type { RatTreatment, LegalBasis, RiskLevel } from '@/types/shared';
 import { LEGAL_BASIS_LABELS, RISK_LEVEL_LABELS } from '@/types/shared';
 import { RatExportButtons } from './rat-export-buttons';
+import { RatSeedButton } from './rat-seed-button';
 
 export const revalidate = 0;
 
@@ -62,7 +63,10 @@ export default async function RatPage() {
           </p>
         </div>
 
-        <RatExportButtons treatments={treatments} />
+        <div className="flex items-center gap-3">
+          {total < 5 && <RatSeedButton tenantId={profile?.tenant_id} />}
+          <RatExportButtons treatments={treatments} />
+        </div>
       </div>
 
       {/* KPI Cards */}
@@ -109,6 +113,10 @@ export default async function RatPage() {
             <p className="text-gray-500 text-sm mt-1 max-w-md mx-auto">
               Puedes inicializar automáticamente los 8 tratamientos estándar para Shopify y WooCommerce preparados según las directrices de la Ley 21.719.
             </p>
+
+            <div className="mt-4">
+              <RatSeedButton tenantId={profile?.tenant_id} label="⚡ Inicializar 8 Tratamientos Estándar de E-Commerce" />
+            </div>
 
             {templates && templates.length > 0 && (
               <div className="mt-6">

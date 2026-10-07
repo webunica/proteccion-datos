@@ -165,7 +165,7 @@ export async function POST(
       recommendations: [
         !widgetDetected ? 'Instala el script de widget.js en el layout theme.liquid de Shopify.' : null,
         (ratCount || 0) < 5 ? `Faltan tratamientos en el RAT: actualmente tienes ${ratCount || 0} de los 5 mínimos sugeridos para e-commerce.` : null,
-        !rightsFormDetected ? 'Crea la página /pages/derechos-arco en tu tienda con el shortcode o div del formulario.' : null,
+        (!rightsFormDetected && !widgetDetected) ? 'Crea la página /pages/derechos-arsop en tu tienda con el shortcode o div del formulario.' : null,
       ].filter(Boolean),
     };
 

@@ -173,6 +173,13 @@ export default function NewClientPage() {
 
     setCreated(data as CreatedTenant);
     setLoading(false);
+
+    // Auto-inicializar los 8 tratamientos estándar de RAT para la tienda
+    fetch('/api/rat/seed', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tenant_id: data.id }),
+    }).catch(err => console.warn('Error auto-seeding RAT:', err));
   }
 
   function copyToClipboard(text: string, key: string) {
