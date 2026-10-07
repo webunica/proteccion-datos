@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Layers,
   Sparkles,
+  Shield,
 } from 'lucide-react';
 import type { Tenant } from '@/types/shared';
 import { CodeSnippet } from '@/components/dashboard/code-snippet';
@@ -171,6 +172,56 @@ export default async function ClientWidgetPage({ params }: ClientWidgetPageProps
           <CodeSnippet code={shopifySnippet} title="HTML <head> Snippet" />
         </div>
       )}
+
+      {/* Explicación Técnica de Auto-Blocking de Scripts */}
+      <div className="bg-gradient-to-br from-slate-900 to-indigo-950 text-white rounded-2xl p-6 shadow-md space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold">
+              <Shield className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-bold text-white">Auto-Blocking de Scripts & Google Consent Mode v2 Activo</h2>
+              <p className="text-xs text-slate-300">Garantía de cero fugas de datos conforme al estándar de la Ley N° 21.719</p>
+            </div>
+          </div>
+          <span className="text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2.5 py-1 rounded-full uppercase self-start sm:self-auto">
+            Auto-Blocking Activo
+          </span>
+        </div>
+
+        <p className="text-xs text-slate-300 leading-relaxed">
+          Para evitar multas de hasta <strong>20.000 UTM</strong> por recopilación no consentida, el widget intercepta automáticamente los pixels de marketing y analítica antes de que el usuario interactúe con el banner:
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs pt-1">
+          <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+            <span className="font-bold text-rose-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-rose-500" />
+              Pausados antes del consentimiento:
+            </span>
+            <ul className="text-slate-300 space-y-1 pl-3 list-disc text-[11px]">
+              <li><strong>Meta Pixel (Facebook/Instagram):</strong> <code>fbq('track')</code> retenido en cola.</li>
+              <li><strong>Google Analytics 4 & Ads:</strong> Consent Mode v2 en <code>denied</code>.</li>
+              <li><strong>TikTok Pixel:</strong> <code>ttq.track()</code> pausado sin disparar cookies.</li>
+              <li><strong>Microsoft Clarity & Hotjar:</strong> Grabación de sesiones bloqueada.</li>
+            </ul>
+          </div>
+
+          <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-1">
+            <span className="font-bold text-emerald-400 flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
+              Siempre Permitidos (Esenciales):
+            </span>
+            <ul className="text-slate-300 space-y-1 pl-3 list-disc text-[11px]">
+              <li><strong>Carrito y Checkout:</strong> Sesiones de Shopify / WooCommerce activas.</li>
+              <li><strong>Pasarelas de Pago:</strong> Transbank, Mercado Pago, Fintoc.</li>
+              <li><strong>Seguridad y CSRF:</strong> Cookies técnicas necesarias para la compra.</li>
+              <li><strong>Desbloqueo Inmediato:</strong> Al consentir, se despachan los eventos en cola sin perder atribución.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
 
       {/* Formulario ARSOP+ */}
       <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] space-y-4">

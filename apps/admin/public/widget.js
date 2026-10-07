@@ -178,8 +178,94 @@
     }
   }
 
+  // 1.3 Auto-Blocking Inteligente de Scripts (Meta Pixel, TikTok Pixel, GA4, Clarity)
+  var _leyPendingFbq = [];
+  var _leyPendingTtq = [];
+  var _leyMarketingAllowed = false;
+  var _leyAnalyticsAllowed = false;
+
+  function initScriptAutoBlocking() {
+    var state = getConsentState();
+    if (state && state.categories) {
+      _leyMarketingAllowed = Boolean(state.categories.marketing);
+      _leyAnalyticsAllowed = Boolean(state.categories.analytics);
+    }
+
+    // Auto-Blocking de Meta Pixel (fbq) si no hay consentimiento previo de marketing
+    if (!_leyMarketingAllowed) {
+      var originalFbq = window.fbq;
+      window.fbq = function () {
+        var args = Array.prototype.slice.call(arguments);
+        var action = args[0];
+        // Bloquear 'track' y 'trackCustom' para evitar fuga de datos personales
+        if (action === 'track' || action === 'trackCustom') {
+          if (!_leyMarketingAllowed) {
+            _leyPendingFbq.push(args);
+            return;
+          }
+        }
+        if (typeof originalFbq === 'function') {
+          originalFbq.apply(window, args);
+        } else if (originalFbq && originalFbq.queue) {
+          originalFbq.queue.push(args);
+        }
+      };
+      if (originalFbq) {
+        for (var prop in originalFbq) {
+          if (Object.prototype.hasOwnProperty.call(originalFbq, prop)) {
+            window.fbq[prop] = originalFbq[prop];
+          }
+        }
+      }
+    }
+
+    // Auto-Blocking de TikTok Pixel (ttq) si no hay consentimiento de marketing
+    if (!_leyMarketingAllowed && window.ttq && typeof window.ttq.track === 'function') {
+      var origTtqTrack = window.ttq.track;
+      window.ttq.track = function () {
+        var args = Array.prototype.slice.call(arguments);
+        if (!_leyMarketingAllowed) {
+          _leyPendingTtq.push(args);
+          return;
+        }
+        origTtqTrack.apply(window.ttq, args);
+      };
+    }
+  }
+
+  function unblockPendingScripts(categories) {
+    if (categories.marketing) {
+      _leyMarketingAllowed = true;
+      // Despachar eventos retenidos en cola de Meta Pixel
+      if (typeof window.fbq === 'function' && _leyPendingFbq.length > 0) {
+        while (_leyPendingFbq.length > 0) {
+          var fbqArgs = _leyPendingFbq.shift();
+          try {
+            window.fbq.apply(window, fbqArgs);
+          } catch (e) {}
+        }
+      }
+      // Despachar eventos retenidos en cola de TikTok Pixel
+      if (window.ttq && typeof window.ttq.track === 'function' && _leyPendingTtq.length > 0) {
+        while (_leyPendingTtq.length > 0) {
+          var ttqArgs = _leyPendingTtq.shift();
+          try {
+            window.ttq.track.apply(window.ttq, ttqArgs);
+          } catch (e) {}
+        }
+      }
+    }
+
+    if (categories.analytics) {
+      _leyAnalyticsAllowed = true;
+    }
+  }
+
   function dispatchConsentEvent(state) {
     window.dispatchEvent(new CustomEvent('ley21719:consent', { detail: state }));
+
+    // Desbloqueo transparente de scripts en cola
+    unblockPendingScripts(state.categories);
 
     // Sincronización Google Consent Mode v2
     updateGoogleConsentMode(state.categories);
@@ -856,6 +942,7 @@
   // Inicialización
   function init() {
     initGoogleConsentMode();
+    initScriptAutoBlocking();
     var existing = getConsentState();
     if (!existing) {
       createBanner();

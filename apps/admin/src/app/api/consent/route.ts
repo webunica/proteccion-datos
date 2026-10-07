@@ -48,11 +48,36 @@ export async function POST(request: NextRequest) {
     const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
     const ipHash = hashIP(ip);
 
+    // Generación de Prueba Criptográfica HMAC-SHA256 con Marca de Tiempo (Art. 21 y Carga de la Prueba Ley 21.719)
+    const hmacSecret = process.env.IP_HASH_SALT || 'ley21719-consent-hmac-secret-v1';
+    const timestamp = Date.now();
+    const canonicalPayload = `${tenant.id}:${session_id}:${timestamp}:${JSON.stringify({
+      essential: !!categories.essential,
+      analytics: !!categories.analytics,
+      marketing: !!categories.marketing,
+      personalization: !!categories.personalization,
+    })}:${policy_version}`;
+
+    const proofToken = crypto
+      .createHmac('sha256', hmacSecret)
+      .update(canonicalPayload)
+      .digest('hex');
+
+    const enhancedCategories = {
+      ...categories,
+      _proof: {
+        hmac: proofToken,
+        timestamp,
+        algorithm: 'HMAC-SHA256',
+        canonical_payload: canonicalPayload,
+      },
+    };
+
     const { error: insertError } = await supabase.from('consents').insert({
       tenant_id: tenant.id,
       session_id,
       ip_hash: ipHash,
-      categories,
+      categories: enhancedCategories,
       policy_version,
       user_agent: request.headers.get('user-agent'),
     });
@@ -65,7 +90,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ success: true }, { status: 201, headers: corsHeaders() });
+    return NextResponse.json(
+      {
+        success: true,
+        proof_token: proofToken,
+        timestamp,
+        algorithm: 'HMAC-SHA256',
+      },
+      { status: 201, headers: corsHeaders() }
+    );
   } catch (err) {
     console.error('Consent API Error:', err);
     return NextResponse.json(

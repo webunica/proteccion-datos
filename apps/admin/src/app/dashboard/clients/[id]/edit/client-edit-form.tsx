@@ -312,9 +312,9 @@ export function ClientEditForm({ initialTenant }: ClientEditFormProps) {
               onChange={(e) => setPlan(e.target.value as Plan)}
               className="w-full px-3.5 py-2 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 text-sm bg-white"
             >
-              <option value="basic">Basic</option>
-              <option value="pro">Pro</option>
-              <option value="enterprise">Enterprise</option>
+              <option value="basic">Starter ($9.950 CLP/mes · 1 Tienda)</option>
+              <option value="pro">Pro ($50.991 CLP/mes · 3 Tiendas · RAT, EIPD, Brechas 72h)</option>
+              <option value="enterprise">Enterprise ($127.491 CLP/mes · Ilimitado · Marca Blanca)</option>
             </select>
           </div>
         </div>

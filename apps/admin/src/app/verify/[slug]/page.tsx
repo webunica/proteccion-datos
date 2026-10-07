@@ -259,6 +259,14 @@ export default async function VerifyCertificatePage({ params }: VerifyPageProps)
             </pre>
           </div>
         </div>
+
+        {/* Disclaimer de Confianza Oficial Webúnica */}
+        <div className="bg-slate-900 text-slate-300 rounded-2xl p-5 text-xs print:hidden space-y-1">
+          <p className="font-bold text-white">Declaración de Rol Webúnica:</p>
+          <p>
+            &quot;No somos un estudio de abogados que cobra honorarios por hora: somos la plataforma de software e infraestructura creada por expertos en desarrollo web para que tu tienda y sitio web cumplan automáticamente las exigencias técnicas de la Ley 21.719.&quot;
+          </p>
+        </div>
       </div>
     </div>
   );

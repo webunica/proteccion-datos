@@ -425,9 +425,9 @@ export default function NewClientPage() {
           <Section title="Plan" icon={User} />
           <div className="grid grid-cols-3 gap-3">
             {([
-              { value: 'basic', label: 'Basic', desc: 'Para tiendas pequeñas', color: 'text-slate-600' },
-              { value: 'pro', label: 'Pro', desc: 'La opción más popular', color: 'text-brand-600' },
-              { value: 'enterprise', label: 'Enterprise', desc: 'Para grandes volúmenes', color: 'text-amber-600' },
+              { value: 'basic', label: 'Starter ($9.950/mes)', desc: '1 Tienda · Retención HMAC 12m', color: 'text-slate-600' },
+              { value: 'pro', label: 'Pro ($50.991/mes)', desc: '3 Tiendas · RAT, EIPD y Brechas 72h', color: 'text-brand-600' },
+              { value: 'enterprise', label: 'Enterprise ($127.491/mes)', desc: 'Ilimitado · Marca Blanca total', color: 'text-amber-600' },
             ] as { value: Plan; label: string; desc: string; color: string }[]).map(p => (
               <label
                 key={p.value}

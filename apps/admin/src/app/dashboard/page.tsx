@@ -11,6 +11,10 @@ import {
   Activity,
   CheckCircle2,
   XCircle,
+  KeyRound,
+  Sparkles,
+  ArrowRight,
+  Shield,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 
@@ -240,6 +244,118 @@ export default async function DashboardPage() {
             <ClipboardList className="w-4 h-4 text-slate-500" />
             Actualizar RAT
           </Link>
+        </div>
+      </div>
+
+      {/* Disclaimer de Confianza Webúnica */}
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 text-white rounded-3xl p-6 sm:p-7 border border-slate-800 shadow-md">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="space-y-1.5 max-w-3xl">
+            <div className="flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-md">
+                <Shield className="w-3.5 h-3.5" />
+                Infraestructura Oficial Webúnica
+              </span>
+              <span className="text-xs text-slate-400 font-mono">
+                Estándar APDP 2026 · Ley N° 21.719
+              </span>
+            </div>
+            <h2 className="text-base sm:text-lg font-bold text-white tracking-tight">
+              &quot;No somos un estudio de abogados que cobra honorarios por hora: somos la plataforma de software e infraestructura creada por expertos en desarrollo web para que tu tienda y sitio web cumplan automáticamente las exigencias técnicas de la Ley 21.719.&quot;
+            </h2>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Resolvemos la carga de la prueba mediante sellado criptográfico HMAC-SHA256, auto-blocking previo de Meta Pixel / GA4 / TikTok y canal de derechos ARSOP+ verificado con OTP.
+            </p>
+          </div>
+          <div className="flex sm:flex-col gap-2 shrink-0">
+            <Link
+              href="/dashboard/consents"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-sm"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              Evidencia HMAC
+            </Link>
+            <Link
+              href="/dashboard/certificate"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white/10 hover:bg-white/20 text-white rounded-xl text-xs font-semibold transition-all border border-white/15"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-400" />
+              Sello & Certificado
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Puesta en Marcha en 3 Pasos */}
+      <div className="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100">
+          <div>
+            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider block">
+              Puesta en Marcha Inmediata
+            </span>
+            <h3 className="text-lg font-bold text-slate-900 tracking-tight">
+              Tu tienda protegida en 3 simples pasos
+            </h3>
+          </div>
+          <span className="text-xs text-slate-500">
+            Sin reuniones interminables ni desarrollos a medida.
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2 relative">
+            <div className="w-7 h-7 rounded-lg bg-blue-600 text-white font-black text-xs flex items-center justify-center">
+              01
+            </div>
+            <h4 className="text-sm font-bold text-slate-900">Instala en 2 Minutos</h4>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Pega 1 sola línea de script en Shopify (<code>theme.liquid</code>) o activa el plugin para WooCommerce y WordPress.
+            </p>
+            <div className="pt-2">
+              <Link
+                href="/dashboard/clients"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800"
+              >
+                Ver script de integración
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2 relative">
+            <div className="w-7 h-7 rounded-lg bg-purple-600 text-white font-black text-xs flex items-center justify-center">
+              02
+            </div>
+            <h4 className="text-sm font-bold text-slate-900">Auto-Blocking & Google Consent Mode</h4>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              El sistema pausa automáticamente Meta Pixel, GA4 y TikTok hasta el consentimiento libre del usuario, sin romper la compra.
+            </p>
+            <div className="pt-2">
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-purple-700">
+                <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
+                Consent Mode v2 Activo
+              </span>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200/70 space-y-2 relative">
+            <div className="w-7 h-7 rounded-lg bg-emerald-600 text-white font-black text-xs flex items-center justify-center">
+              03
+            </div>
+            <h4 className="text-sm font-bold text-slate-900">Blindaje Legal & Prueba HMAC</h4>
+            <p className="text-xs text-slate-500 leading-relaxed">
+              Cada decisión queda sellada con hash HMAC-SHA256 y marca de tiempo inmutable, lista para exportar en CSV ante la APDP.
+            </p>
+            <div className="pt-2">
+              <Link
+                href="/dashboard/consents"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-900"
+              >
+                Auditar libro de pruebas
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 

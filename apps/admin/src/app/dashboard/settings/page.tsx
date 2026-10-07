@@ -180,6 +180,63 @@ export default async function SettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Planes Webúnica & Retención de Evidencia HMAC */}
+      <div className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-[0_1px_3px_0_rgba(15,23,42,0.03)] space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Planes Oficiales Webúnica Ley N° 21.719</h2>
+            <p className="text-xs text-slate-500">Tarifa plana en Pesos Chilenos (CLP) sin recargos por visitas en Cyber</p>
+          </div>
+          <span className="text-xs font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+            ★ Clientes Webúnica: 30% OFF de por vida
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+            <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider block">Starter (Hasta Dic.)</span>
+            <p className="text-lg font-black text-slate-900">$9.950 CLP<span className="text-xs font-normal text-slate-500">/mes + IVA</span></p>
+            <ul className="text-slate-600 space-y-1 text-[11px] list-disc pl-3">
+              <li>1 Tienda / Dominio (Shopify / Woo)</li>
+              <li>Prueba HMAC-SHA256 (Retención 12 meses)</li>
+              <li>Canal ARSOP+ con OTP y Sello Web</li>
+              <li>Google Consent Mode v2 Activo</li>
+            </ul>
+          </div>
+
+          <div className="p-4 rounded-xl border-2 border-purple-500 bg-purple-50/20 space-y-2 relative">
+            <span className="absolute -top-2.5 right-3 bg-purple-600 text-white font-bold text-[9px] uppercase px-2 py-0.5 rounded-full">Más Popular</span>
+            <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider block">Pro (15% OFF)</span>
+            <p className="text-lg font-black text-slate-900">$50.991 CLP<span className="text-xs font-normal text-slate-500">/mes + IVA</span></p>
+            <ul className="text-slate-600 space-y-1 text-[11px] list-disc pl-3">
+              <li>Hasta 3 Tiendas / Dominios</li>
+              <li>Prueba HMAC (Retención 3 años)</li>
+              <li>Exportador CSV APDP + RAT + EIPD</li>
+              <li>Gestor de Brechas 72h y DPAs Chile</li>
+            </ul>
+          </div>
+
+          <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/50 space-y-2">
+            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-wider block">Enterprise</span>
+            <p className="text-lg font-black text-slate-900">$127.491 CLP<span className="text-xs font-normal text-slate-500">/mes + IVA</span></p>
+            <ul className="text-slate-600 space-y-1 text-[11px] list-disc pl-3">
+              <li>Tiendas y Dominios Ilimitados</li>
+              <li>Marca Blanca Total</li>
+              <li>Multi-usuario con roles para equipos</li>
+              <li>Auditoría técnica anual y SLA 24/7</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Declaración de Confianza Footer */}
+      <div className="p-5 rounded-2xl bg-slate-900 text-slate-300 text-xs leading-relaxed space-y-1">
+        <p className="font-bold text-white">Declaración de Rol Webúnica:</p>
+        <p>
+          &quot;No somos un estudio de abogados que cobra honorarios por hora: somos la plataforma de software e infraestructura creada por expertos en desarrollo web para que tu tienda y sitio web cumplan automáticamente las exigencias técnicas de la Ley 21.719.&quot;
+        </p>
+      </div>
     </div>
   );
 }

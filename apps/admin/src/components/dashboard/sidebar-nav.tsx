@@ -13,6 +13,7 @@ import {
   FileCheck,
   Award,
   Scale,
+  KeyRound,
   Settings,
   LogOut,
   ChevronRight,
@@ -44,6 +45,11 @@ const navItems: NavItem[] = [
     href: '/dashboard/rights',
     label: 'Solicitudes ARSOP+',
     icon: Inbox,
+  },
+  {
+    href: '/dashboard/consents',
+    label: 'Evidencia Criptográfica',
+    icon: KeyRound,
   },
   {
     href: '/dashboard/rat',
