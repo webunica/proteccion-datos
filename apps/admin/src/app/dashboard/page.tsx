@@ -28,6 +28,7 @@ interface StatCard {
   color: string;
   bg: string;
   trend?: string;
+  key?: string;
 }
 
 interface ComplianceScore {
