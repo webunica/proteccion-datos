@@ -208,7 +208,7 @@ async function sendAcknowledgementEmail({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM || 'notificaciones@privacy.tudominio.com',
+      from: process.env.EMAIL_FROM || 'proteccion-datos@webunica.cl',
       to: [to],
       subject: `Acuse de recibo — Solicitud de derechos Ley 21.719 (${storeName})`,
       html: `
@@ -265,7 +265,7 @@ async function sendDpoAlertEmail({
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: process.env.EMAIL_FROM || 'notificaciones@privacy.tudominio.com',
+      from: process.env.EMAIL_FROM || 'proteccion-datos@webunica.cl',
       to: [to],
       subject: `🚨 [ALERTA DPO] Nueva solicitud ARSOP+ (${storeName}) — ${typeMap[requestType] || requestType}`,
       html: `

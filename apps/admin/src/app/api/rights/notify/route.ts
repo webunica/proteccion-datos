@@ -239,7 +239,7 @@ export async function POST(request: NextRequest) {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              from: process.env.EMAIL_FROM || 'notificaciones@privacy.tudominio.com',
+              from: process.env.EMAIL_FROM || 'proteccion-datos@webunica.cl',
               to: [reqData.requester_email],
               subject: emailSubject,
               html: emailHtml,
