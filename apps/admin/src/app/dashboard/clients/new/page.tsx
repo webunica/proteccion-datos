@@ -71,6 +71,40 @@ interface CreatedTenant {
   slug: string;
 }
 
+const inputClass =
+  'w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition';
+
+function Section({ title, icon: Icon }: { title: string; icon: React.ElementType }) {
+  return (
+    <div className="flex items-center gap-2 mb-4 pt-2">
+      <Icon className="w-4 h-4 text-brand-600" />
+      <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">{title}</h3>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  required,
+  hint,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-1.5">
+        {label} {required && <span className="text-red-500">*</span>}
+      </label>
+      {children}
+      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
+    </div>
+  );
+}
+
 export default function NewClientPage() {
   const router = useRouter();
   const supabase = createClient();
@@ -225,35 +259,6 @@ export default function NewClientPage() {
     );
   }
 
-  const Section = ({ title, icon: Icon }: { title: string; icon: React.ElementType }) => (
-    <div className="flex items-center gap-2 mb-4 pt-2">
-      <Icon className="w-4 h-4 text-brand-600" />
-      <h3 className="font-semibold text-gray-800 text-sm uppercase tracking-wide">{title}</h3>
-    </div>
-  );
-
-  const Field = ({
-    label,
-    required,
-    hint,
-    children,
-  }: {
-    label: string;
-    required?: boolean;
-    hint?: string;
-    children: React.ReactNode;
-  }) => (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1.5">
-        {label} {required && <span className="text-red-500">*</span>}
-      </label>
-      {children}
-      {hint && <p className="text-xs text-gray-400 mt-1">{hint}</p>}
-    </div>
-  );
-
-  const inputClass =
-    'w-full px-3.5 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent transition';
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
