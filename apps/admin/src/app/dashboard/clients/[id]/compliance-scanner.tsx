@@ -172,7 +172,13 @@ export function ComplianceScanner({ tenantSlug, initialWebsite }: ComplianceScan
         </div>
       </div>
 
-      {/* Checklist de los 4 Pilares */}
+      {/* Nota de alcance legal y responsabilidad proactiva */}
+      <div className="p-3.5 bg-amber-50/60 border border-amber-200/80 rounded-xl text-[11px] text-amber-900/80 leading-relaxed flex items-start gap-2.5">
+        <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+        <p>
+          <strong>Alcance del diagnóstico (Art. 21 y 24 Ley N° 21.719):</strong> Este índice evalúa la presencia técnica de componentes y el inventario preliminar de tratamientos. La licitud de las bases legales asignadas, el uso efectivo de herramientas de terceros (píxeles, pasarelas, ERPs) y los plazos tributarios deben ser validados y documentados por el responsable de la tienda en el RAT.
+        </p>
+      </div>
       <div className="space-y-3">
         <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
           Verificación de Obligaciones Legales:
